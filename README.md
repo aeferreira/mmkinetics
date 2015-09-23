@@ -1,33 +1,30 @@
-mmkinetics: web app for the analysis of enzyme kinetics data
-============================================================
+# mmkinetics
 
-mmkinetics is a Python project developed with the major goal of providing a web-based application to assist the analysis of enzyme kinetics data, focusing on parameter estimation, visualization and model diagnostics.
+## web app for the analysis of enzyme kinetics data
+
+*mmkinetics* is a Python project developed with the major goal of providing a web-based application to assist the analysis of enzyme kinetics data, focusing on parameter estimation, visualization and model diagnostics.
 
 
-Features
---------
+### Features
 
 - Web application: no need to install anything on your personal device
 - Parameter estimation: point estimation, standard errors and coffidence intervals (even for non-parametric methods)
 - Visualization of data/fitting models with optional export of reports and graphs
 - Persistance of the analysis for 10 days
 
-Status
-------
+### Status
 
-mmkinetics is at an incipient alpha stage. Much progress is expected in the next few months.
+*mmkinetics* is at an incipient **alpha stage**. Much progress is expected in the next few months.
 
-Documentation
--------------
+### Documentation
 
 Still not available
 
-Dependencies (to run a server)
-------------------------------
+### Dependencies (to run a server)
 
-- Python 2.7 or 3.3+
+- Python 2.7
 
-### Mandatory
+#### Mandatory
 
 - [numpy](http://www.numpy.org/)
 
@@ -35,26 +32,20 @@ Dependencies (to run a server)
 
 - [matplotlib](http://matplotlib.sourceforge.net)
 
-- [pandas](http://pandas.pydata.org/)
-
 - [flask](http://flask.pocoo.org/)
 
 - [bokeh plots](http://bokeh.pydata.org/)
 
-Installation
-------------
+### Installation
 
-When ready and registered on PyPI, pip based installation will be available.
+When ready and registered on [PyPI](https://pypi.python.org/pypi), **pip-based installation** will be available.
 
+### License
 
-License
--------
+Released under a BSD (3-clause) license. See LICENSE file.
 
-Released under a BSD (3-clause) license
+### Contributors
 
-Authors
--------
-
-António Ferreira (aeferreira@fc.ul.pt)
-Pedro Reis (pedro_reis_22@hotmail.com)
+- António Ferreira
+- Pedro Reis
 
