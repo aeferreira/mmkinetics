@@ -1,26 +1,25 @@
-import flask, flask.views
+
+from flask import Flask, url_for, request, render_template, session, redirect, make_response
 from scipy.optimize import curve_fit
 from scipy import stats
 import numpy as np
+import os
 
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
-enzkin = flask.Flask(__name__)
-
-enzkin.secret_key = 'aceitam-sesugestoes'
-
-class Page(flask.views.MethodView):
-    def get(self):
-        return flask.render_template('test.html')
-
-    def post(self):
-        data = str(flask.request.form['timevsconc'])
+@app.route('/', methods=['POST', 'GET'])
+def front_page():
+    if request.method == 'POST':
+        data = str(request.form['timevsconc'])
         aux=''
         saida=0
         xy=[]
 
         for i in data:
             aux+=i
-        
+
+        messages=[]
         for line in aux.splitlines():
             line = line.strip()
             if '#' in line:
@@ -28,34 +27,34 @@ class Page(flask.views.MethodView):
             elif len(line.replace(' ','')) == 0:
                 continue
             elif len(line.split()) != 2:
-                flask.flash('Please provide a two column input')
+                messages.append('Please provide a two column input')
                 saida = 1
                 break
             elif float(line.split()[0]) == 0 or float(line.split()[1]) == 0:
-                flask.flash('Please remove zero values from data')
+                messages.append('Please remove zero values from data')
                 saida = 1
                 break
             xy.append([line.split()[0],line.split()[1]])
-        
+
         if saida != 1:
-            flask.flash('xy'+str(xy))        
+            messages.append('xy'+str(xy))        
             hanes = Hanes(xy)
             hofstee = Hofstee(xy)
             burk = Burk(xy)
-            hyp_reg = Hyp_Reg(xy)
-            cornish_bowden = Cornish_Bowden(xy)
-         
-            flask.flash('hanes'+str(hanes))
-            flask.flash('hofstee'+str(hofstee))
-            flask.flash('burk'+str(burk))
-            flask.flash('regression'+str(hyp_reg))
-            flask.flash('cornish'+str(cornish_bowden))
-
-        return self.get()
-
-enzkin.add_url_rule('/', view_func=Page.as_view('main'), methods=['GET', 'POST'])
-
-
+            try:
+                hyp_reg = Hyp_Reg(xy)
+            except:
+                hyp_reg = "Could not estimate kinect constants from the hyperbolic regression method"
+            try:
+                cornish_bowden = Cornish_Bowden(xy)
+            except:
+                cornish_bowden = "Could not estimate kinect constants from the Cornish-Bowden method"
+            return render_template('test.html', results=[hanes,hofstee,burk,hyp_reg,cornish_bowden])
+        else:
+            return render_template('test.html', messages=messages)
+    else:
+        return render_template('test.html')
+    
 def Hanes(xy):
     hanes=[]
     for i in xy:
@@ -145,9 +144,9 @@ def Cornish_Bowden(xy):
     # Vmax, Km, error interval Vmax, error interval Km, straights
     return [np.median(intersects_y),np.median(intersects_x),str(min(intersects_y))+'-'+str(max(intersects_y)),str(min(intersects_x))+'-'+str(max(intersects_x)),straights]
 
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True)
 
-
-enzkin.run()
 #testing
 #0.00858 0.05
 #0.01688 0.1
@@ -157,5 +156,4 @@ enzkin.run()
 #0.03447 2.5
 #0.03993 5
 
-#acertar casas decimais com o erro javascript ou python ?
 #alterar formato de input ? [s] vs v

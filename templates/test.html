@@ -4,19 +4,26 @@
     </head>
     <body>
         Enter a two column format text (velocity vs concentration) to process:
+        {% if messages %}
+        <pre>
+          {% for message in messages %}
+	  {{ message }}
+          {% endfor %}
+        </pre>
+        {% endif %}
+
         <form action="/" method="post">
             <textarea name="timevsconc" rows="30" cols="20"></textarea>
             <input type="submit" value="Execute" />
         </form>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                Results:
-                <pre>
-                    {% for message in messages %}
-{{ message }}
-                    {% endfor %}
-                </pre>
-            {% endif %}
-        {% endwith %}
+	<br>
+	{% if results %}
+	Results:
+	<pre>
+          {% for result in results %}
+	  {{ result }}
+          {% endfor %}
+        </pre>
+        {% endif %}
     </body>
 </html>
