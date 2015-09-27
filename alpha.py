@@ -4,7 +4,9 @@ from scipy.optimize import curve_fit
 from scipy import stats
 import numpy as np
 import os
-from bokeh.plotting import figure, output_file, show
+from bokeh.plotting import figure, output_file, save
+from bokeh.resources import CDN
+from bokeh.embed import file_html, components
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -63,14 +65,15 @@ def front_page():
                 cornish_bowden = "Could not estimate kinect constants from the Cornish-Bowden method"
 
             results=[]
-            results.append(('hanes', hanes[0], hanes[1],hanes[2]))
+            results.append(('hanes', hanes[0], hanes[1], hanes[2]))
             results.append(('hofstee', hofstee[0], hofstee[1], hofstee[2]))
             results.append(('burk', burk[0], burk[1], burk[2]))
             results.append(('hyp_reg', round(hyp_reg[0],6), round(hyp_reg[1],6), [round(float(i), 6) for i in hyp_reg[2]]))
-            print cornish_bowden[2]
-            print cornish_bowden[3]
             results.append(('cornish_bowden', cornish_bowden[0], cornish_bowden[1], cornish_bowden[2], cornish_bowden[3] ))
-            return render_template('test.html', results=results, home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
+
+            #bokeh_script, = graphs(hanes[3] ,'test')
+            
+            return render_template('test.html', results=results, home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'), bokeh_script=hanes[3][0], bokeh_div=hanes[3][1])
         else:
             return render_template('test.html', messages=messages, home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
     else:
@@ -82,7 +85,6 @@ def help():
         readme = ''
         for line in file:
             readme+=line
-    print readme
     return render_template('help.html', home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'), readme=readme.decode('utf-8'))
 
 @app.route('/contacts', methods=['POST', 'GET'])
@@ -96,7 +98,7 @@ def Hanes(xy):
     slope, intercept, r_value, p_value, std_error = stats.linregress([i[0] for i in hanes], [i[1] for i in hanes])
 
     # Vmax, Km, error, lin_reg, points
-    return [round(slope**-1, 6), round(intercept*(slope**-1),6), round(std_error,6), hanes]
+    return [round(slope**-1, 6), round(intercept*(slope**-1),6), round(std_error,6), graphs(hanes, 'test')]
 
 def Hofstee(xy):
     hofstee=[]
@@ -178,26 +180,38 @@ def Cornish_Bowden(xy):
     # Vmax, Km, error interval Vmax, error interval Km, straights
     return [round(np.median(intersects_y),6), round(np.median(intersects_x),6), str(round(min(intersects_y),6))+';'+str(round(max(intersects_y),6)),str(round(min(intersects_x),6))+';'+str(round(max(intersects_x),6)),straights]
 
-#def graphs(points, name):
-#    output_file("static/{0}.html".format(name))
-#    p = figure(plot_width=400, plot_height=400)
-#    xpoints = []
-#    ypoints = []
-#    for i in points:
-#        xpoints.append(i[0])
-#        ypoints.append(i[1])
-#    p.line(xpoints, ypoints, line_width=2)
-#
+def graphs(points, name):
+    
+    #output_file('static/my_plot.html')
+    p = figure(plot_width=300, plot_height=300)
+    
+    xpoints = []
+    ypoints = []
+    
+    for i in points:
+        xpoints.append(i[0])
+        ypoints.append(i[1])
+    
+    p.square(xpoints, ypoints, legend=name, fill_color=None, line_color="black")
+    p.line(xpoints, ypoints, legend=name, line_color="black")
+
+    script, div = components(p)
+    html = file_html(p, CDN, "my_plot")
+    #save(p)
+    return script, div
+    
+    
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
-
-#testing
-#0.00858 0.05
-#0.01688 0.1
-#0.02489 0.25
-#0.03032 0.5
-#0.03543 1
-#0.03447 2.5
-#0.03993 5   
-#
+'''
+testing
+0.00858 0.05
+0.01688 0.1
+0.02489 0.25
+0.03032 0.5
+0.03543 1
+0.03447 2.5
+0.03993 5   
+'''
 #alterar formato de input ? [s] vs v
