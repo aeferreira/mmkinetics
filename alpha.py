@@ -11,47 +11,50 @@ from bokeh.embed import file_html, components
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/')
+def landing():  
+    return render_template('landing.html', home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
+
+@app.route('/front', methods=['POST', 'GET'])
 def front_page():
     if request.method == 'POST':
         data = str(request.form['timevsconc'])
-        aux=''
-        saida=0
+        aux = data[:] # TODO is this copy really necessary?
+        
+        bad_input=False
+        
         xy=[]
-
-        for i in data:
-            aux+=i
 
         messages=[]
         if len(aux.replace('\n', '').split()) == 0:
-            saida = 1
+            bad_input = True
             messages.append('Please provide a two column input')
         for line in aux.splitlines():
             line = line.strip()
-            if '#' in line:
-                continue
-            try:
-                float(line.split()[0])
-                float(line.split()[1])
-            except:
-                messages.append('Please comment text lines with a # symbol')
-                saida = 1
-                break
-            if len(line.replace(' ','')) == 0:
+            if len(line) == 0 or line.startswith('#'):
                 continue
             if len(line.split()) != 2:
                 messages.append('Please provide a two column input')
-                saida = 1
+                bad_input = True
                 break
-            if float(line.split()[0]) == 0 or float(line.split()[1]) == 0:
-                messages.append('Please remove zero values from data')
-                saida = 1
+            try:
+                x0 = float(line.split()[0])
+                x1 = float(line.split()[1])
+            except:
+                messages.append('Please comment text lines with a # symbol')
+                bad_input = True
                 break
             
-            xy.append([line.split()[0],line.split()[1]])
+            # TODO: handle this better: (0,0) should be a legal input point
+            if x0 == 0 or x1 == 0:
+                messages.append('Please remove zero values from data')
+                bad_input = True
+                break
+            
+            xy.append([x0,x1])
 
-        if saida != 1:
-            messages.append('xy'+str(xy))        
+        if not bad_input:
+            messages.append('xy'+ str(xy))        
             hanes = Hanes(xy)
             hofstee = Hofstee(xy)
             burk = Burk(xy)
@@ -64,6 +67,9 @@ def front_page():
             except:
                 cornish_bowden = "Could not estimate kinect constants from the Cornish-Bowden method"
 
+            # ISSUE: if hyp_reg or cornish_bowden fail, they become strings
+            # and the code below fails or reports chars, because of indexing
+            
             results=[]
             results.append(('hanes', hanes[0], hanes[1], hanes[2]))
             results.append(('hofstee', hofstee[0], hofstee[1], hofstee[2]))
@@ -73,23 +79,24 @@ def front_page():
 
             #bokeh_script, = graphs(hanes[3] ,'test')
             
-            return render_template('test.html', results=results, home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'), bokeh_script=hanes[3][0], bokeh_div=hanes[3][1])
+            return render_template('test.html', results=results, home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'), bokeh_script=hanes[3][0], bokeh_div=hanes[3][1])
         else:
-            return render_template('test.html', messages=messages, home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
+            return render_template('test.html', messages=messages, home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
     else:
-        return render_template('test.html', home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
+        return render_template('test.html', home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
 
-@app.route('/help', methods=['POST', 'GET'])
+@app.route('/help')
 def help():
+    # TODO: use module markdown2 to convert README to html fragment
     with open('README.md', 'r') as file:
         readme = ''
         for line in file:
             readme+=line
-    return render_template('help.html', home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'), readme=readme.decode('utf-8'))
+    return render_template('help.html', home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'), readme=readme.decode('utf-8'))
 
-@app.route('/contacts', methods=['POST', 'GET'])
+@app.route('/contacts')
 def contacts():  
-    return render_template('contacts.html', home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
+    return render_template('contacts.html', home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
 
 def Hanes(xy):
     hanes=[]
@@ -119,8 +126,8 @@ def Burk(xy):
     return [round(intercept**-1,6), round(slope*(intercept)**-1,6), round(std_error,6), burk]
 
 
-def menten(s, vmax, km):
-    return vmax * s / (km + s)
+def menten(s, V, Km):
+    return V * s / (Km + s)
 
 def Hyp_Reg(xy):
     s = []
@@ -203,9 +210,9 @@ def graphs(points, name):
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(debug=True)
 '''
-testing
+# testing data
 0.00858 0.05
 0.01688 0.1
 0.02489 0.25
@@ -215,3 +222,4 @@ testing
 0.03993 5   
 '''
 #alterar formato de input ? [s] vs v
+# TODO: yes, it is better!
