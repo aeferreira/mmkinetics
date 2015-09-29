@@ -1,135 +1,106 @@
-<html>
-  <head>
-    <title>Enzyme Kinetics Parameters Calculations</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    <!-- Bootstrap -->
-    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.9.0.min.css" type="text/css" />
-    <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.9.0.min.js"></script>
-    {{ bokeh_script | safe }}
-  </head>
-  
-  <style>
-    body {
-    background-color: #FFA726;
-    font-family: 'Roboto', sans-serif;
-    }
-    bk-plot-left {
-    width: 100%;
-    height: 100%;
-    }
-    plotdiv {
-    width: 100%;
-    height: 100%;
-    }
-  </style>
-  
-  <body>
-    <div class="container">
-      <div class="row" style="margin-top:5px">
-    <div class="col-md-6" style="padding-top:10px">
-      <img src="http://www.fc.ul.pt/sites/default/files/fcul/institucional/normas_graficas/Ciencias_UL_Azul_H.png" style="width:270px;height:70px;" alt="logo.png"></img>
-    </div>
-    <ul class="nav nav-tabs" style="padding-top:50px;margin-bottom:10px;font-size: 15px;">
-      <li role="presentation" class="active"><a href="{{ home }}">Home</a></li>
-      <li role="presentation"><a href="{{ url_for('help') }}">Help</a></li>
-      <li role="presentation"><a href="{{ url_for('contacts') }}">Contacts</a></li>
-    </ul>
-      </div>
-      <div class="row">
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="row">
     <div class="col-md-4">
-      <div style=";margin-bottom:10px">
-        Input your data (velocity vs concentration) to process:
-      </div>
+      <h4>Input your data (velocity vs concentration):</h4>
+
       {% if messages %}
-      <p class="bg-danger" style="text-align:center">
-        {% for message in messages %}
-        {{ message }}
-        {% endfor %}
-      </p>
+        <!-- Error messages -->
+        <p class="bg-danger" style="text-align:center">
+          {% for message in messages %}
+                {{ message }}
+          {% endfor %}
+        </p>
       {% endif %}
-        
+
+      <!-- Input box -->
       <form action="/front" method="post">
-        <textarea name="timevsconc" style="width:100%;height:60%;margin-bottom:2%;color: #333;border: 1px solid #ccc;border-radius: 4px;resize: none"></textarea>
-        <p><input type="submit" class="btn btn-default" value="Execute" style="width:100%;height:5%;"/></p>
+        <textarea name="timevsconc" class="timevsconc">
+              {% if data %}{{ data }} {% endif %}
+        </textarea>
+        <p><input type="submit" class="btn btn-primary" value="Compute" style="width:100%;height:5%;"/></p>
       </form>
     </div>
-    
+
+    <!-- Results report -->
+    <div class="col-md-4">
+       {% if results %}
+           <h4>Results:</h4>
+           <div class="report_results">
+           {% for result in results %}
+              <p><strong>{{ result[0] }}</strong></p>
+
+              {% if loop.index < 4 %}
+              <table style="width:100%">
+                <tr>
+                    <td>V<sub>max</sub></td>
+                    <td>{{ result[1] }}</td>
+                </tr>
+                <tr>
+                    <td>K<sub>m</sub></td>
+                    <td>{{ result[2] }}</td>
+                </tr>
+                <tr>
+                    <td>StdError</td>
+                    <td>{{ result[3] }}</td>
+                </tr>
+              </table>
+              <br />
+              {% elif loop.index < 5 %}
+              <table style="width:100%">
+                <tr>
+                    <td>V<sub>max</sub></td>
+                    <td>{{ result[1] }}</td>
+                </tr>
+                <tr>
+                    <td>K<sub>m</sub></td>
+                    <td>{{ result[2] }}</td>
+                </tr>
+                <tr>
+                    <td>StdError V<sub>max</sub></td>
+                    <td>{{ result[3][0] }}</td>
+                </tr>
+                <tr>
+                    <td>StdError K<sub>m</sub></td>
+                    <td>{{ result[3][1] }}</td>
+              </table>
+              <br />
+              {% else %}
+              <table style="width:100%">
+                <tr>
+                    <td>V<sub>max</sub></td>
+                    <td>{{ result[1] }}</td>
+                </tr>
+                <tr>
+                    <td>K<sub>m</sub></td>
+                    <td>{{ result[2] }}</td>
+                </tr>
+                <tr>
+                    <td>Error Interval V<sub>max</sub></td>
+                    <td>[{{ result[3] }}]</td>
+                </tr>
+                <tr>
+                    <td>Error Interval K<sub>m</sub></td>
+                    <td>[{{ result[4] }}]</td>
+                </tr>
+              </table>
+              <br />
+              {% endif %}
+           {% endfor %}</div>
+       {% endif %}
+    </div>
+
+    <!-- Plot -->
+
     <div class="col-md-4">
       {% if results %}
-      Results:
-      <div style="color: #333;border:1px solid #ccc;border-radius: 4px;background-color: #f5f5f5;padding-top:5px;margin-top:10px;overflow: scroll;width:100%;height:66%;padding-left: 5%">
-            {% for result in results %}
-                <p><b>{{ result[0] }}</b></p>
-                {% if loop.index < 4 %}
-                        <table style="width:100%">
-                            <tr>
-                               <td>V<sub>max</sub></td>
-                               <td>{{ result[1] }}</td>
-                            </tr>
-                            <tr>
-                               <td>K<sub>m</sub></td>
-                               <td>{{ result[2] }}</td>
-                            </tr>
-                            <tr>
-                               <td>StdError</td>
-                               <td>{{ result[3] }}</td>
-                            </tr>
-                        </table>
-                        <br>
-                {% elif loop.index < 5 %}
-                        <table style="width:100%">
-                          <tr>
-                        <td>V<sub>max</sub></td>
-                        <td>{{ result[1] }}</td>
-                          </tr>
-                          <tr>
-                        <td>K<sub>m</sub></td>
-                        <td>{{ result[2] }}</td>
-                          </tr>
-                          <tr>
-                        <td>StdError V<sub>max</sub></td>
-                        <td>{{ result[3][0] }}</td>
-                          </tr>
-                          <tr>
-                        <td>StdError K<sub>m</sub></td>
-                        <td>{{ result[3][1] }}</td>
-                        </table>
-                        <br>
-                {% else %}
-                        <table style="width:100%">
-                          <tr>
-                        <td>V<sub>max</sub></td>
-                        <td>{{ result[1] }}</td>
-                          </tr>
-                          <tr>
-                        <td>K<sub>m</sub></td>
-                        <td>{{ result[2] }}</td>
-                          </tr>
-                          <tr>
-                        <td>Error Interval V<sub>max</sub></td>
-                        <td>[{{ result[3] }}]</td>
-                          </tr>
-                          <tr>
-                        <td>Error Interval K<sub>m</sub></td>
-                        <td>[{{ result[4] }}]</td>
-                        </table>
-                        <br>
-                {% endif %}
-            {% endfor %}
-                        
-      </div>
+         <h4>Plots:</h4>
+         <div style="color: #333;border:1px solid #ccc;border-radius: 4px;background-color: #f5f5f5;padding-top:5px;margin-top:10px;overflow: scroll;width:100%;height:66%;padding-left: 5%">
+            {{ bokeh_div |safe }}
+         </div>
       {% endif %}
     </div>
-    <div class="col-md-4">
-      {% if results %}
-      Plots:
-      <div style="color: #333;border:1px solid #ccc;border-radius: 4px;background-color: #f5f5f5;padding-top:5px;margin-top:10px;overflow: scroll;width:100%;height:66%;padding-left: 5%">	    
-        {{ bokeh_div |safe }}
-        {% endif %}
-      </div>
-    </div>
-      </div>
-    </div>
-  </body>
-</html>
+
+</div>
+{% endblock %}

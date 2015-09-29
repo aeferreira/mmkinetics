@@ -5,6 +5,7 @@
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <!-- Bootstrap -->
     <link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='mmk_styles.css') }}" rel="stylesheet">
   </head>
   <style>
     body {
@@ -18,7 +19,7 @@
 	  <img src="http://www.fc.ul.pt/sites/default/files/fcul/institucional/normas_graficas/Ciencias_UL_Azul_H.png" style="width:270px;height:70px;" alt="logo.png"></img>
 	</div>
 	<ul class="nav nav-tabs" style="padding-top:50px;margin-bottom:10px;font-size: 15px;">
-	  <li role="presentation"><a href="{{ home }}">Home</a></li>
+	  <li role="presentation"><a href="{{ url_for('front_page') }}">Home</a></li>
 	  <li role="presentation" class="active"><a href="{{ url_for('help') }}">Help</a></li>
 	  <li role="presentation"><a href="{{ url_for('contacts') }}">Contacts</a></li>
 	</ul>

@@ -15,6 +15,20 @@ app.secret_key = os.urandom(24)
 def landing():  
     return render_template('landing.html')
 
+@app.route('/help')
+def help():
+    # TODO: use module markdown2 to convert README to html fragment
+    with open('README.md', 'r') as file:
+        readme = ''
+        for line in file:
+            readme+=line
+    return render_template('help.html', readme=readme.decode('utf-8'))
+
+@app.route('/contacts')
+def contacts():  
+    return render_template('contacts.html')
+
+
 @app.route('/front', methods=['POST', 'GET'])
 def front_page():
     if request.method == 'POST':
@@ -73,32 +87,19 @@ def front_page():
             # and the code below fails or reports chars, because of indexing
             
             results=[]
-            results.append(('hanes', hanes[0], hanes[1], hanes[2]))
-            results.append(('hofstee', hofstee[0], hofstee[1], hofstee[2]))
-            results.append(('burk', burk[0], burk[1], burk[2]))
-            results.append(('hyp_reg', round(hyp_reg[0],6), round(hyp_reg[1],6), [round(float(i), 6) for i in hyp_reg[2]]))
-            results.append(('cornish_bowden', cornish_bowden[0], cornish_bowden[1], cornish_bowden[2], cornish_bowden[3] ))
+            results.append(('Hanes', hanes[0], hanes[1], hanes[2]))
+            results.append(('Eddie-Hofstee', hofstee[0], hofstee[1], hofstee[2]))
+            results.append(('Lineweaver-Burk', burk[0], burk[1], burk[2]))
+            results.append(('Hyperbolic regression', round(hyp_reg[0],6), round(hyp_reg[1],6), [round(float(i), 6) for i in hyp_reg[2]]))
+            results.append(('Cornish-Bowden', cornish_bowden[0], cornish_bowden[1], cornish_bowden[2], cornish_bowden[3] ))
 
             #bokeh_script, = graphs(hanes[3] ,'test')
             
-            return render_template('test.html', results=results, home=url_for('front_page'), bokeh_script=hanes[3][0], bokeh_div=hanes[3][1])
+            return render_template('test.html', data=data, results=results, bokeh_script=hanes[3][0], bokeh_div=hanes[3][1])
         else:
-            return render_template('test.html', messages=messages, home=url_for('front_page'))
+            return render_template('test.html', messages=messages, data=data)
     else:
-        return render_template('test.html', home=url_for('front_page'))
-
-@app.route('/help')
-def help():
-    # TODO: use module markdown2 to convert README to html fragment
-    with open('README.md', 'r') as file:
-        readme = ''
-        for line in file:
-            readme+=line
-    return render_template('help.html', home=url_for('front_page'), readme=readme.decode('utf-8'))
-
-@app.route('/contacts')
-def contacts():  
-    return render_template('contacts.html', home=url_for('front_page'))
+        return render_template('test.html')
 
 # TODO: discuss the need for these early application of round on the regression
 def Hanes(xy):
