@@ -13,22 +13,24 @@ app.secret_key = os.urandom(24)
 
 @app.route('/')
 def landing():  
-    return render_template('landing.html', home=url_for('front_page'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
+    return render_template('landing.html')
 
 @app.route('/front', methods=['POST', 'GET'])
 def front_page():
     if request.method == 'POST':
         data = str(request.form['timevsconc'])
-        aux = data[:] # TODO is this copy really necessary?
-        
+        aux = data[:] # TODO is this copy really necessary ?
         bad_input=False
         
         xy=[]
 
         messages=[]
+
+        #chaeck if input is empty
         if len(aux.replace('\n', '').split()) == 0:
             bad_input = True
             messages.append('Please provide a two column input')
+
         for line in aux.splitlines():
             line = line.strip()
             if len(line) == 0 or line.startswith('#'):
@@ -54,7 +56,7 @@ def front_page():
             xy.append([x0,x1])
 
         if not bad_input:
-            messages.append('xy'+ str(xy))        
+            messages.append('xy'+ str(xy))
             hanes = Hanes(xy)
             hofstee = Hofstee(xy)
             burk = Burk(xy)
@@ -79,11 +81,11 @@ def front_page():
 
             #bokeh_script, = graphs(hanes[3] ,'test')
             
-            return render_template('test.html', results=results, home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'), bokeh_script=hanes[3][0], bokeh_div=hanes[3][1])
+            return render_template('test.html', results=results, home=url_for('front_page'), bokeh_script=hanes[3][0], bokeh_div=hanes[3][1])
         else:
-            return render_template('test.html', messages=messages, home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
+            return render_template('test.html', messages=messages, home=url_for('front_page'))
     else:
-        return render_template('test.html', home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
+        return render_template('test.html', home=url_for('front_page'))
 
 @app.route('/help')
 def help():
@@ -92,12 +94,13 @@ def help():
         readme = ''
         for line in file:
             readme+=line
-    return render_template('help.html', home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'), readme=readme.decode('utf-8'))
+    return render_template('help.html', home=url_for('front_page'), readme=readme.decode('utf-8'))
 
 @app.route('/contacts')
 def contacts():  
-    return render_template('contacts.html', home=url_for('landing'), help_url=url_for('help'), contacts=url_for('contacts'), bootstrap=url_for('static', filename='bootstrap.css'))
+    return render_template('contacts.html', home=url_for('front_page'))
 
+# TODO: discuss the need for these early application of round on the regression
 def Hanes(xy):
     hanes=[]
     for i in xy:
@@ -105,7 +108,10 @@ def Hanes(xy):
     slope, intercept, r_value, p_value, std_error = stats.linregress([i[0] for i in hanes], [i[1] for i in hanes])
 
     # Vmax, Km, error, lin_reg, points
-    return [round(slope**-1, 6), round(intercept*(slope**-1),6), round(std_error,6), graphs(hanes, 'test')]
+    return (round(slope**-1, 6),
+            round(intercept*(slope**-1),6),
+            round(std_error,6),
+            graphs(hanes, 'Hanes'))
 
 def Hofstee(xy):
     hofstee=[]
@@ -114,7 +120,10 @@ def Hofstee(xy):
     slope, intercept, r_value, p_value, std_error = stats.linregress([i[0] for i in hofstee], [i[1] for i in hofstee])
 
     # Vmax, Km, error, lin_reg, points
-    return [round(intercept,6), round(slope*-1,6), round(std_error,6), hofstee]
+    return (round(intercept,6),
+            round(slope*-1,6),
+            round(std_error,6),
+            hofstee)
     
 def Burk(xy):
     burk=[]
@@ -123,52 +132,52 @@ def Burk(xy):
     slope, intercept, r_value, p_value, std_error = stats.linregress([i[0] for i in burk], [i[1] for i in burk])
 
     # Vmax, Km, error, lin_reg, points 
-    return [round(intercept**-1,6), round(slope*(intercept)**-1,6), round(std_error,6), burk]
-
+    return (round(intercept**-1,6),
+            round(slope*(intercept)**-1,6),
+            round(std_error,6),
+            burk)
 
 def menten(s, V, Km):
     return V * s / (Km + s)
 
 def Hyp_Reg(xy):
+
     s = []
     v = []
 
     for i in xy:
         s.append(float(i[1]))
         v.append(float(i[0]))
-
     estimated_vmax = max(v)
     for i in range(len(s)):
         if v[i] < estimated_vmax / 2:
             estimated_km = s[i]
-    
     s = np.array(s)
     v = np.array(v)
-
     initial_guess = [estimated_vmax,estimated_km]
     popt, pcov = curve_fit(menten, s, v, p0=initial_guess)
-    
     sfit = np.linspace(0,max(s)*1.1)
     vfit = menten(sfit, popt[0], popt[1])
-    
     hyp_reg = [] 
     for i in range(len(sfit)):
         hyp_reg.append([sfit[i],vfit[i]])
-
+    
     # Vmax, Km, error(Vmax,Km), hyp_reg, points
     return  [popt[0], popt[1], str(np.sqrt(np.diag(pcov))).replace('[', '').replace(']', '').split(), hyp_reg, xy]
 
+
 def Cornish_Bowden(xy):
+
     cornish_bowden = []
     straights      = []
     intersects     = []
     done           = []
-    for i in xy:
 
+    for i in xy:
         m = (float(i[0]) / float(i[1]))
         b = float(i[0])
-
         straights.append([m,b])
+
     for s in range(0,len(straights)):
         for ss in range(0,len(straights)):
             done.append([s,ss])
@@ -183,7 +192,7 @@ def Cornish_Bowden(xy):
 
     intersects_x = [i[0] for i in intersects]
     intersects_y = [i[1] for i in intersects]
-    
+
     # Vmax, Km, error interval Vmax, error interval Km, straights
     return [round(np.median(intersects_y),6), round(np.median(intersects_x),6), str(round(min(intersects_y),6))+';'+str(round(max(intersects_y),6)),str(round(min(intersects_x),6))+';'+str(round(max(intersects_x),6)),straights]
 
@@ -206,8 +215,6 @@ def graphs(points, name):
     html = file_html(p, CDN, "my_plot")
     #save(p)
     return script, div
-    
-    
 
 if __name__ == '__main__':
     app.run(debug=True)
