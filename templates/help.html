@@ -1,36 +1,11 @@
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Enzyme Kinetics Parameters Calculations</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    <!-- Bootstrap -->
-    <link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='mmk_styles.css') }}" rel="stylesheet">
-  </head>
-  <style>
-    body {
-    background-color: #FFA726;
-    }
-  </style>
-  <body>
-    <div class="container">
-      <div class="row" style="margin-top:5px">
-	<div class="col-md-6" style="padding-top:10px">
-	  <img src="http://www.fc.ul.pt/sites/default/files/fcul/institucional/normas_graficas/Ciencias_UL_Azul_H.png" style="width:270px;height:70px;" alt="logo.png"></img>
-	</div>
-	<ul class="nav nav-tabs" style="padding-top:50px;margin-bottom:10px;font-size: 15px;">
-	  <li role="presentation"><a href="{{ url_for('front_page') }}">Home</a></li>
-	  <li role="presentation" class="active"><a href="{{ url_for('help') }}">Help</a></li>
-	  <li role="presentation"><a href="{{ url_for('contacts') }}">Contacts</a></li>
-	</ul>
-      </div>
-      <div class="row">
-	<div class="col-md-12">
-	  <pre style="overflow:scroll;width:100%;height:80%;padding-top:5px;margin-top:10px;padding-left: 5%;color: #333;text-align: left;font-family:'Roboto', sans-serif;">
-	    {{ readme }}
-	  </pre>
-	</div>
-      </div>
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-12">
+        <pre style="overflow:scroll;width:100%;height:80%;padding-top:5px;margin-top:10px;padding-left: 5%;color: #333;text-align: left;font-family:'Roboto', sans-serif;">
+        {{ readme }}
+        </pre>
     </div>
-  </body>
-<html>
+</div>
+{% endblock %}

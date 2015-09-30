@@ -1,14 +1,31 @@
 <html>  
   <head>    
     <title>MM kinetics</title>    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--<link rel="icon" href="../../favicon.ico">-->
+
+    <title>Michaelis-Menten kinetics</title>
+
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    <!-- Bootstrap -->    
+    <!-- include Bootstrap and site specific stylesheets -->
     <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='mmk_styles.css') }}" rel="stylesheet">
-    <!-- Bokeh -->    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- include Bokeh by CDN-->
     <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.9.0.min.css" type="text/css" />
     <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-0.9.0.min.js"></script>
     {{ bokeh_script | safe }}
+
   </head>
   <body>
     <div class="container">
@@ -21,9 +38,14 @@
           <li role="presentation"><a href="{{ url_for('help') }}">Help</a></li>
           <li role="presentation"><a href="{{ url_for('contacts') }}">Contacts</a></li>
         </ul>
-    </div>    
-    
+    </div>
 {% block body %}{% endblock %}
-    </div>  
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+
   </body>
 </html>
