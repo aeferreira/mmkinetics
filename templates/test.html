@@ -13,7 +13,7 @@
 </div>
 <div class="row">
     <div class="col-md-4">
-      <h4>Input your data (velocity vs concentration):</h4>
+      <h4>Input your data (<em><abbr title="Initial rate">v<sub>0</sub></abbr></em> vs <abbr title="Concentration">a</abbr>):</h4>
 
       {% if messages %}
         <!-- Error messages -->
@@ -26,10 +26,12 @@
 
       <!-- Input box -->
       <form action="/front" method="post">
-        <textarea name="timevsconc" class="timevsconc">
+        <textarea id="timevsconc" name="timevsconc" class="timevsconc">
               {% if data %}{{ data }} {% endif %}
         </textarea>
-        <p><input type="submit" class="btn btn-primary" value="Compute" style="width:100%;height:5%;"/></p>
+        <button type="submit" class="btn btn-primary">Compute</button>
+        <button type="button" id="demo" class="btn btn-default">Demo data</button>
+        <button type="button" id="clear" class="btn btn-danger">Clear</button>        
       </form>
     </div>
 
@@ -44,7 +46,7 @@
               {% if loop.index < 4 %}
               <table style="width:100%">
                 <tr>
-                    <td>V<sub>max</sub></td>
+                    <td>V</td>
                     <td>{{ result[1] }}</td>
                 </tr>
                 <tr>
@@ -60,7 +62,7 @@
               {% elif loop.index < 5 %}
               <table style="width:100%">
                 <tr>
-                    <td>V<sub>max</sub></td>
+                    <td>V</td>
                     <td>{{ result[1] }}</td>
                 </tr>
                 <tr>
@@ -68,7 +70,7 @@
                     <td>{{ result[2] }}</td>
                 </tr>
                 <tr>
-                    <td>StdError V<sub>max</sub></td>
+                    <td>StdError V</td>
                     <td>{{ result[3][0] }}</td>
                 </tr>
                 <tr>
@@ -79,7 +81,7 @@
               {% else %}
               <table style="width:100%">
                 <tr>
-                    <td>V<sub>max</sub></td>
+                    <td>V</td>
                     <td>{{ result[1] }}</td>
                 </tr>
                 <tr>
@@ -87,7 +89,7 @@
                     <td>{{ result[2] }}</td>
                 </tr>
                 <tr>
-                    <td>Error Interval V<sub>max</sub></td>
+                    <td>Error Interval V</td>
                     <td>[{{ result[3] }}]</td>
                 </tr>
                 <tr>
@@ -106,7 +108,7 @@
     <div class="col-md-4">
       {% if results %}
          <h4>Plots:</h4>
-         <div style="color: #333;border:1px solid #ccc;border-radius: 4px;background-color: #f5f5f5;padding-top:5px;margin-top:10px;overflow: scroll;width:100%;height:66%;padding-left: 5%">
+         <div style="color: #333;border:1px solid #ccc;border-radius:4px;background-color:#f5f5f5;padding-top:5px;margin-top:10px;overflow:scroll;width:100%;height:66%;padding-left:10px;">
             {{ bokeh_div |safe }}
          </div>
       {% endif %}
