@@ -94,7 +94,6 @@ def front_page():
             results.append(('Cornish-Bowden', cornish_bowden[0], cornish_bowden[1], cornish_bowden[2], cornish_bowden[3] ))
 
             #bokeh_script, = graphs(hanes[3] ,'test')
-            
             return render_template('test.html', data=data, results=results, bokeh_script=hanes[3][0], bokeh_div=hanes[3][1])
         else:
             return render_template('test.html', messages=messages, data=data)

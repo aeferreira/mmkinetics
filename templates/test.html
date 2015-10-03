@@ -28,16 +28,14 @@
       <form action="/front" method="post">
         <div class="btn-toolbar" role="toolbar" aria-label="Input toolbar">
             <div class="btn-group" role="group" aria-label="Compute button">
-                <button type="submit" class="btn btn-primary">Compute parameters</button>
+                <button type="submit" id="input_compute" class="btn btn-primary">Compute parameters</button>
             </div>
             <div class="btn-group" role="group" aria-label="Other buttons">
-                <button type="button" id="demo" class="btn btn-default">Demo data</button>
-                <button type="button" id="clear" class="btn btn-danger">Clear</button>        
+                <button type="button" id="input_demo" class="btn btn-default">Demo data</button>
+                <button type="button" id="input_clear" class="btn btn-danger">Clear</button>        
             </div>
         </div>        
-        <textarea id="timevsconc" name="timevsconc" class="timevsconc">
-              {% if data %}{{ data }} {% endif %}
-        </textarea>
+        <textarea id="timevsconc" name="timevsconc" class="timevsconc">{% if data %}{{ data }} {% endif %}</textarea>
       </form>
     </div>
 
