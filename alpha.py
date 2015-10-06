@@ -1,12 +1,9 @@
-
 from flask import Flask, url_for, request, render_template, session, redirect, make_response
-from scipy.optimize import curve_fit
-from scipy import stats
-import numpy as np
 import os
 from bokeh.plotting import figure, output_file, save
 from bokeh.resources import CDN
 from bokeh.embed import file_html, components
+import methods
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -36,7 +33,8 @@ def front_page():
         aux = data[:] # TODO is this copy really necessary ?
         bad_input=False
         
-        xy=[]
+        x=[]
+        y=[]
 
         messages=[]
 
@@ -67,134 +65,44 @@ def front_page():
                 bad_input = True
                 break
             
-            xy.append([x0,x1])
+            x.append(x0)
+            y.append(x1)
 
-        if not bad_input:
-            messages.append('xy'+ str(xy))
-            hanes = Hanes(xy)
-            hofstee = Hofstee(xy)
-            burk = Burk(xy)
-            try:
-                hyp_reg = Hyp_Reg(xy)
-            except:
-                hyp_reg = "Could not estimate kinect constants from the hyperbolic regression method"
-            try:
-                cornish_bowden = Cornish_Bowden(xy)
-            except:
-                cornish_bowden = "Could not estimate kinect constants from the Cornish-Bowden method"
-
-            # ISSUE: if hyp_reg or cornish_bowden fail, they become strings
-            # and the code below fails or reports chars, because of indexing
-            
-            results=[]
-            results.append(('Hanes', hanes[0], hanes[1], hanes[2]))
-            results.append(('Eddie-Hofstee', hofstee[0], hofstee[1], hofstee[2]))
-            results.append(('Lineweaver-Burk', burk[0], burk[1], burk[2]))
-            results.append(('Hyperbolic regression', round(hyp_reg[0],6), round(hyp_reg[1],6), [round(float(i), 6) for i in hyp_reg[2]]))
-            results.append(('Cornish-Bowden', cornish_bowden[0], cornish_bowden[1], cornish_bowden[2], cornish_bowden[3] ))
-
-            #bokeh_script, = graphs(hanes[3] ,'test')
-            return render_template('test.html', data=data, results=results, bokeh_script=hanes[3][0], bokeh_div=hanes[3][1])
-        else:
+        if bad_input:
             return render_template('test.html', messages=messages, data=data)
+
+        v0, a = methods.lists2arrays(x, y)
+        
+        messages.append('xy ' + str([(x,y) for (x,y) in zip(v0,a)]))
+        
+        hanes = methods.Hanes(v0, a)
+        hofstee = methods.Hofstee(v0, a)
+        burk = methods.Burk(v0, a)
+        try:
+            hyp_reg = methods.Hyp_Reg(v0, a)
+        except:
+            hyp_reg = "Could not estimate kinect constants from the hyperbolic regression method"
+        try:
+            cornish_bowden = methods.Cornish_Bowden(v0, a)
+        except:
+            cornish_bowden = "Could not estimate kinect constants from the Cornish-Bowden method"
+
+        # ISSUE: if hyp_reg or cornish_bowden fail, they become strings
+        # and the code below fails or reports chars, because of indexing
+        
+        results=[]
+        results.append(('Hanes', hanes[0], hanes[1], hanes[2]))
+        results.append(('Eddie-Hofstee', hofstee[0], hofstee[1], hofstee[2]))
+        results.append(('Lineweaver-Burk', burk[0], burk[1], burk[2]))
+        results.append(('Hyperbolic regression', hyp_reg[0], hyp_reg[1], hyp_reg[2], hyp_reg[3]))
+        results.append(('Cornish-Bowden', cornish_bowden[0], cornish_bowden[1], cornish_bowden[2], cornish_bowden[3] ))
+
+        #bokeh_script, = graphs(hanes[3] ,'test')
+        script, div = graphs(hanes[3], 'Hanes')
+        return render_template('test.html', data=data, results=results, 
+                               bokeh_script=script, bokeh_div=div)
     else:
         return render_template('test.html')
-
-# TODO: discuss the need for these early application of round on the regression
-def Hanes(xy):
-    hanes=[]
-    for i in xy:
-        hanes.append([float(i[1]),float(i[1])/float(i[0])])
-    slope, intercept, r_value, p_value, std_error = stats.linregress([i[0] for i in hanes], [i[1] for i in hanes])
-
-    # Vmax, Km, error, lin_reg, points
-    return (round(slope**-1, 6),
-            round(intercept*(slope**-1),6),
-            round(std_error,6),
-            graphs(hanes, 'Hanes'))
-
-def Hofstee(xy):
-    hofstee=[]
-    for i in xy:
-        hofstee.append([float(i[0])/float(i[1]),float(i[0])])
-    slope, intercept, r_value, p_value, std_error = stats.linregress([i[0] for i in hofstee], [i[1] for i in hofstee])
-
-    # Vmax, Km, error, lin_reg, points
-    return (round(intercept,6),
-            round(slope*-1,6),
-            round(std_error,6),
-            hofstee)
-    
-def Burk(xy):
-    burk=[]
-    for i in xy:
-        burk.append([1/float(i[1]),1/float(i[0])])
-    slope, intercept, r_value, p_value, std_error = stats.linregress([i[0] for i in burk], [i[1] for i in burk])
-
-    # Vmax, Km, error, lin_reg, points 
-    return (round(intercept**-1,6),
-            round(slope*(intercept)**-1,6),
-            round(std_error,6),
-            burk)
-
-def menten(s, V, Km):
-    return V * s / (Km + s)
-
-def Hyp_Reg(xy):
-
-    s = []
-    v = []
-
-    for i in xy:
-        s.append(float(i[1]))
-        v.append(float(i[0]))
-    estimated_vmax = max(v)
-    for i in range(len(s)):
-        if v[i] < estimated_vmax / 2:
-            estimated_km = s[i]
-    s = np.array(s)
-    v = np.array(v)
-    initial_guess = [estimated_vmax,estimated_km]
-    popt, pcov = curve_fit(menten, s, v, p0=initial_guess)
-    sfit = np.linspace(0,max(s)*1.1)
-    vfit = menten(sfit, popt[0], popt[1])
-    hyp_reg = [] 
-    for i in range(len(sfit)):
-        hyp_reg.append([sfit[i],vfit[i]])
-    
-    # Vmax, Km, error(Vmax,Km), hyp_reg, points
-    return  [popt[0], popt[1], str(np.sqrt(np.diag(pcov))).replace('[', '').replace(']', '').split(), hyp_reg, xy]
-
-
-def Cornish_Bowden(xy):
-
-    cornish_bowden = []
-    straights      = []
-    intersects     = []
-    done           = []
-
-    for i in xy:
-        m = (float(i[0]) / float(i[1]))
-        b = float(i[0])
-        straights.append([m,b])
-
-    for s in range(0,len(straights)):
-        for ss in range(0,len(straights)):
-            done.append([s,ss])
-            if [ss,s] in done:
-                continue
-            if s == ss:
-                continue
-            else:
-                x = ( straights[ss][1] - straights[s][1] ) / ( straights[s][0] - straights[ss][0] )
-                y = ( straights[s][1]*straights[ss][0] - straights[ss][1]*straights[s][0] ) / ( straights[ss][0] - straights[s][0] )
-                intersects.append([x,y])
-
-    intersects_x = [i[0] for i in intersects]
-    intersects_y = [i[1] for i in intersects]
-
-    # Vmax, Km, error interval Vmax, error interval Km, straights
-    return [round(np.median(intersects_y),6), round(np.median(intersects_x),6), str(round(min(intersects_y),6))+';'+str(round(max(intersects_y),6)),str(round(min(intersects_x),6))+';'+str(round(max(intersects_x),6)),straights]
 
 def graphs(points, name):
     

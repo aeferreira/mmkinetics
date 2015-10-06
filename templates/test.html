@@ -35,7 +35,7 @@
                 <button type="button" id="input_clear" class="btn btn-danger">Clear</button>        
             </div>
         </div>        
-        <textarea id="timevsconc" name="timevsconc" class="timevsconc">{% if data %}{{ data }} {% endif %}</textarea>
+        <textarea id="timevsconc" name="timevsconc" class="timevsconc">{% if data %}{{ data }}{% endif %}</textarea>
       </form>
     </div>
 
@@ -61,25 +61,6 @@
                     <td>StdError</td>
                     <td>{{ result[3] }}</td>
                 </tr>
-              </table>
-              <br />
-              {% elif loop.index < 5 %}
-              <table style="width:100%">
-                <tr>
-                    <td>V</td>
-                    <td>{{ result[1] }}</td>
-                </tr>
-                <tr>
-                    <td>K<sub>m</sub></td>
-                    <td>{{ result[2] }}</td>
-                </tr>
-                <tr>
-                    <td>StdError V</td>
-                    <td>{{ result[3][0] }}</td>
-                </tr>
-                <tr>
-                    <td>StdError K<sub>m</sub></td>
-                    <td>{{ result[3][1] }}</td>
               </table>
               <br />
               {% else %}
