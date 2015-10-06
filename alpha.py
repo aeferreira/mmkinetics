@@ -30,7 +30,6 @@ def contacts():
 def front_page():
     if request.method == 'POST':
         data = str(request.form['timevsconc'])
-        aux = data[:] # TODO is this copy really necessary ?
         bad_input=False
         
         x=[]
@@ -38,12 +37,12 @@ def front_page():
 
         messages=[]
 
-        #chaeck if input is empty
-        if len(aux.replace('\n', '').split()) == 0:
+        #check if input is empty
+        if len(data.replace('\n', '').split()) == 0:
             bad_input = True
             messages.append('Please provide a two column input')
 
-        for line in aux.splitlines():
+        for line in data.splitlines():
             line = line.strip()
             if len(line) == 0 or line.startswith('#'):
                 continue
@@ -72,52 +71,37 @@ def front_page():
             return render_template('test.html', messages=messages, data=data)
 
         v0, a = methods.lists2arrays(x, y)
-        
-        messages.append('xy ' + str([(x,y) for (x,y) in zip(v0,a)]))
-        
-        hanes = methods.Hanes(v0, a)
-        hofstee = methods.Hofstee(v0, a)
-        burk = methods.Burk(v0, a)
-        try:
-            hyp_reg = methods.Hyp_Reg(v0, a)
-        except:
-            hyp_reg = "Could not estimate kinect constants from the hyperbolic regression method"
-        try:
-            cornish_bowden = methods.Cornish_Bowden(v0, a)
-        except:
-            cornish_bowden = "Could not estimate kinect constants from the Cornish-Bowden method"
-
-        # ISSUE: if hyp_reg or cornish_bowden fail, they become strings
-        # and the code below fails or reports chars, because of indexing
-        
+                
         results=[]
-        results.append(('Hanes', hanes[0], hanes[1], hanes[2]))
-        results.append(('Eddie-Hofstee', hofstee[0], hofstee[1], hofstee[2]))
-        results.append(('Lineweaver-Burk', burk[0], burk[1], burk[2]))
-        results.append(('Hyperbolic regression', hyp_reg[0], hyp_reg[1], hyp_reg[2], hyp_reg[3]))
-        results.append(('Cornish-Bowden', cornish_bowden[0], cornish_bowden[1], cornish_bowden[2], cornish_bowden[3] ))
+        results.append(methods.hanes_woolf(v0, a))
+        results.append(methods.eadie_hofstee(v0, a))
+        results.append(methods.lineweaver_burk(v0, a))
+        results.append(methods.hyperbolic(v0, a))
+        results.append(methods.cornish_bowden(v0, a))
 
         #bokeh_script, = graphs(hanes[3] ,'test')
-        script, div = graphs(hanes[3], 'Hanes')
-        return render_template('test.html', data=data, results=results, 
-                               bokeh_script=script, bokeh_div=div)
+        script, div = graphs(results[0].x, results[0].y, 'Hanes')
+        return render_template('test.html', 
+                               data=data, 
+                               results=results, 
+                               bokeh_script=script, 
+                               bokeh_div=div)
     else:
         return render_template('test.html')
 
-def graphs(points, name):
+def graphs(x, y, name):
     
     #output_file('static/my_plot.html')
     p = figure(plot_width=300, plot_height=300)
-    
-    xpoints = []
-    ypoints = []
-    
-    for i in points:
-        xpoints.append(i[0])
-        ypoints.append(i[1])
-    
-    p.square(xpoints, ypoints, legend=name, fill_color=None, line_color="black")
-    p.line(xpoints, ypoints, legend=name, line_color="black")
+        
+    p.line(x, y, legend=name,
+           line_color="black",
+           line_width=2)
+    p.circle(x, y, legend=name, 
+            fill_color='blue', 
+            fill_alpha=0.2,
+            color='blue',
+            size=8)
 
     script, div = components(p)
     html = file_html(p, CDN, "my_plot")

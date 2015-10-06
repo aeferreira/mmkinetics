@@ -45,45 +45,21 @@
            <h4>Results:</h4>
            <div class="report_results">
            {% for result in results %}
-              <p><strong>{{ result[0] }}</strong></p>
-
-              {% if loop.index < 4 %}
+              <p><strong>{{ result.name }}</strong></p>
               <table style="width:100%">
                 <tr>
-                    <td>V</td>
-                    <td>{{ result[1] }}</td>
+                    <td>V</td><td>{{ result.V|round(6) }}</td>
                 </tr>
                 <tr>
-                    <td>K<sub>m</sub></td>
-                    <td>{{ result[2] }}</td>
+                    <td>K<sub>m</sub></td><td>{{ result.Km|round(6) }}</td>
                 </tr>
+                {% if result.Sm_lin %}
                 <tr>
-                    <td>StdError</td>
-                    <td>{{ result[3] }}</td>
+                    <td>Slope Std error</td><td>{{ result.Sm_lin|round(6) }}</td>
                 </tr>
+                {% endif %}
               </table>
               <br />
-              {% else %}
-              <table style="width:100%">
-                <tr>
-                    <td>V</td>
-                    <td>{{ result[1] }}</td>
-                </tr>
-                <tr>
-                    <td>K<sub>m</sub></td>
-                    <td>{{ result[2] }}</td>
-                </tr>
-                <tr>
-                    <td>Error Interval V</td>
-                    <td>[{{ result[3] }}]</td>
-                </tr>
-                <tr>
-                    <td>Error Interval K<sub>m</sub></td>
-                    <td>[{{ result[4] }}]</td>
-                </tr>
-              </table>
-              <br />
-              {% endif %}
            {% endfor %}</div>
        {% endif %}
     </div>

@@ -3,11 +3,12 @@ from scipy.optimize import curve_fit
 from scipy import stats
 import numpy as np
 
-class kin_results(object):
+class Kin_results(object):
     """Object that holds data from a computation, supporting dot access.
        
        Mandatory data set is:
-
+       
+       name - Name of the method used.
        error - None by default, str describing error in computation
        V - limiting rate
        Km - Michaelis constant
@@ -23,7 +24,8 @@ class kin_results(object):
        SD_V - standard error of the limiting rate
        SD_Km - standard error of the Michelis constant"""
     
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.error = None
         self.V = 0.0
         self.Km = 0.0
@@ -37,41 +39,49 @@ def lists2arrays(x, y):
 def menten(a, V, Km):
     return V * a / (Km + a)
 
-# TODO: discuss the need for these early application of round on the regression
-def Hanes(v0, a):
+def hanes_woolf(v0, a):
     x = a
     y = a/v0
     slope, intercept, r_value, p_value, std_error = stats.linregress(x, y)
-    xy = zip(x,y)
-    V = 1.0/slope
-    Km = intercept * V
-
-    # Vmax, Km, error, lin_reg, points
-    return (round(V, 6), round(Km,6), round(std_error,6), xy)
-
-def Hofstee(v0, a):
+    
+    r = Kin_results('Hanes or Woolf')
+    r.x = x
+    r.y = y
+    r.V = 1.0/slope
+    r.Km = intercept * r.V
+    r.Sm_lin = std_error
+    return r
+    
+def eadie_hofstee(v0, a):
     x = v0/a
     y = v0
     slope, intercept, r_value, p_value, std_error = stats.linregress(x, y)
-    xy = zip(x,y)
     Km = -slope
     V = intercept
 
-    # Vmax, Km, error, lin_reg, points
-    return (round(V, 6), round(Km,6), round(std_error,6), xy)
+    r = Kin_results('Eadie-Hofstee')
+    r.x = x
+    r.y = y
+    r.V = intercept
+    r.Km = -slope
+    r.Sm_lin = std_error
+    return r
     
-def Burk(v0, a):
+def lineweaver_burk(v0, a):
     x = 1.0/a
     y = 1.0/v0
     slope, intercept, r_value, p_value, std_error = stats.linregress(x, y)
     xy = zip(x,y)
-    V = 1.0/intercept
-    Km = slope * V
 
-    # Vmax, Km, error, lin_reg, points
-    return (round(V, 6), round(Km,6), round(std_error,6), xy)
+    r = Kin_results('Lineweaver-Burk')
+    r.x = x
+    r.y = y
+    r.V = 1.0/intercept
+    r.Km = slope * r.V
+    r.Sm_lin = std_error
+    return r
 
-def Hyp_Reg(v0, a):
+def hyperbolic(v0, a):
 
     estimated_V = max(v0)
     estimated_Km = 1
@@ -83,18 +93,16 @@ def Hyp_Reg(v0, a):
     
     popt, pcov = curve_fit(menten, a, v0, p0=initial_guess)
     errors = np.sqrt(np.diag(pcov))
-    V = popt[0]
-    Km = popt[1]
-    SV = errors[0]
-    SKm = errors[1]
-    
-    xy = zip(a,v0)
-        
-    # Vmax, Km, error(Vmax,Km), hyp_reg
-    return (str(round(V, 6)), str(round(Km, 6)), str(round(SV, 6)), str(round(Km, 6)), xy)
+    r = Kin_results('Hyperbolic regression')
+    r.x = a
+    r.y = v0
+    r.V = popt[0]
+    r.Km = popt[1]
+    r.SV = errors[0]
+    r.SKm = errors[1]
+    return r
 
-
-def Cornish_Bowden(v0, a):
+def cornish_bowden(v0, a):
 
     cornish_bowden = []
     straights      = []
@@ -114,6 +122,12 @@ def Cornish_Bowden(v0, a):
 
     intersects_x = [i[0] for i in intersects]
     intersects_y = [i[1] for i in intersects]
-
-    # Vmax, Km, error interval Vmax, error interval Km, straights
-    return [round(np.median(intersects_y),6), round(np.median(intersects_x),6), str(round(min(intersects_y),6))+';'+str(round(max(intersects_y),6)),str(round(min(intersects_x),6))+';'+str(round(max(intersects_x),6)),straights]
+    r = Kin_results('Cornish-Bowden')
+    r.x = a
+    r.y = v0
+    r.V = np.median(intersects_y)
+    r.Km = np.median(intersects_x)
+    r.CI_V = (0,0)
+    r.CI_Km = (0,0)
+    #TODO: compute CIs: it was over estimated. Leave it at zero, for now.
+    return r
