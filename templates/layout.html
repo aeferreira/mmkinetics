@@ -35,6 +35,9 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript">
+      var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+     </script>
     <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='mmk_scripts.js') }}"></script>
 

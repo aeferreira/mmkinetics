@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, render_template, session, redirect, make_response
+from flask import Flask, url_for, request, render_template, session, redirect, make_response, jsonify
 import os
 from bokeh.plotting import figure, output_file, save
 from bokeh.resources import CDN
@@ -25,6 +25,19 @@ def help():
 def contacts():  
     return render_template('contacts.html')
 
+wilkinson = """# Wilkinson demo data
+#a     v
+0.138 0.148
+0.220 0.171
+0.291 0.234
+0.560 0.324
+0.766 0.390
+1.460 0.493
+"""
+
+@app.route('/_demodata')
+def demo_data():
+    return jsonify(result=wilkinson)
 
 @app.route('/front', methods=['POST', 'GET'])
 def front_page():
@@ -70,7 +83,7 @@ def front_page():
         if bad_input:
             return render_template('test.html', messages=messages, data=data)
 
-        v0, a = methods.lists2arrays(x, y)
+        a, v0 = methods.lists2arrays(x, y)
                 
         results=[]
         for m in (methods.hanes_woolf,

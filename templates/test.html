@@ -48,17 +48,17 @@
               <p><strong>{{ result.name }}</strong></p>
               <table style="width:100%">
                 <tr>
-                    <td>V</td><td>{{ result.V|round(6) }}</td>
+                    <td>V</td><td>{{ result.V|round(4) }}</td>
                 </tr>
                 <tr>
-                    <td>K<sub>m</sub></td><td>{{ result.Km|round(6) }}</td>
+                    <td>K<sub>m</sub></td><td>{{ result.Km|round(4) }}</td>
                 </tr>
                 {% if result.SE_V %}
                 <tr>
-                    <td>SE (V)</td><td>{{ result.SE_V|round(6) }}</td>
+                    <td>SE (V)</td><td>{{ result.SE_V|round(4) }}</td>
                 </tr>
                 <tr>
-                    <td>SE (K<sub>m</sub>)</td><td>{{ result.SE_Km|round(6) }}</td>
+                    <td>SE (K<sub>m</sub>)</td><td>{{ result.SE_Km|round(4) }}</td>
                 </tr>
                 {% endif %}
               </table>
