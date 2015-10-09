@@ -73,11 +73,12 @@ def front_page():
         v0, a = methods.lists2arrays(x, y)
                 
         results=[]
-        results.append(methods.hanes_woolf(v0, a))
-        results.append(methods.eadie_hofstee(v0, a))
-        results.append(methods.lineweaver_burk(v0, a))
-        results.append(methods.hyperbolic(v0, a))
-        results.append(methods.cornish_bowden(v0, a))
+        for m in (methods.hanes_woolf,
+                  methods.eadie_hofstee,
+                  methods.lineweaver_burk,
+                  methods.hyperbolic,
+                  methods.cornish_bowden) :
+            results.append(m(a, v0))
 
         #bokeh_script, = graphs(hanes[3] ,'test')
         script, div = graphs(results[0].x, results[0].y, 'Hanes')

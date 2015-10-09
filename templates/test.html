@@ -53,9 +53,12 @@
                 <tr>
                     <td>K<sub>m</sub></td><td>{{ result.Km|round(6) }}</td>
                 </tr>
-                {% if result.Sm_lin %}
+                {% if result.SE_V %}
                 <tr>
-                    <td>Slope Std error</td><td>{{ result.Sm_lin|round(6) }}</td>
+                    <td>SE (V)</td><td>{{ result.SE_V|round(6) }}</td>
+                </tr>
+                <tr>
+                    <td>SE (K<sub>m</sub>)</td><td>{{ result.SE_Km|round(6) }}</td>
                 </tr>
                 {% endif %}
               </table>
