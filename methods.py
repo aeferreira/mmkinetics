@@ -93,9 +93,13 @@ def res_object(method, V, Km, SE_V=None, SE_Km=None, error=None, x=None, y=None)
 
 def lineweaver_burk(a, v0):
     while 0 in a:
-        a = np.delete(a,np.where(a==0))
+        index = np.where(a==0)
+        a = np.delete(a,index)
+        v0 = np.delete(v0,index)
     while 0 in v0:
-        v0 = np.delete(v0,np.where(v0==0))
+        index = np.where(v0==0)
+        a = np.delete(a,index)
+        v0 = np.delete(v0,index)
     x, y = 1/a, 1/v0
     m, b, Sm, Sb, R, p = lin_regression(x, y)
     V = 1.0 / b
@@ -106,9 +110,13 @@ def lineweaver_burk(a, v0):
 
 def hanes_woolf(a, v0):
     while 0 in a:
-        a = np.delete(a,np.where(a==0))
+        index = np.where(a==0)
+        a = np.delete(a,index)
+        v0 = np.delete(v0,index)
     while 0 in v0:
-        v0 = np.delete(v0,np.where(v0==0))
+        index = np.where(v0==0)
+        a = np.delete(a,index)
+        v0 = np.delete(v0,index)
     x = a
     y = a/v0
     m, b, Sm, Sb, R, p = lin_regression(x, y)
@@ -121,9 +129,13 @@ def hanes_woolf(a, v0):
 
 def eadie_hofstee(a, v0):
     while 0 in a:
-        a = np.delete(a,np.where(a==0))
+        index = np.where(a==0)
+        a = np.delete(a,index)
+        v0 = np.delete(v0,index)
     while 0 in v0:
-        v0 = np.delete(v0,np.where(v0==0))
+        index = np.where(v0==0)
+        a = np.delete(a,index)
+        v0 = np.delete(v0,index)
     x = v0/a
     y = v0
     m, b, Sm, Sb, R, p = lin_regression(x, y)
