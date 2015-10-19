@@ -1,8 +1,10 @@
-from flask import Flask, url_for, request, render_template, session, redirect, make_response, jsonify
 import os
-from bokeh.plotting import figure, output_file, save
+from math import atan
+from flask import Flask, url_for, request, render_template, session, redirect, make_response, jsonify
+from bokeh.plotting import figure #not used: , output_file, save
 from bokeh.resources import CDN
 from bokeh.embed import file_html, components
+
 import methods
 
 app = Flask(__name__)
@@ -87,30 +89,40 @@ def front_page():
                   methods.cornish_bowden) :
             results.append(m(a, v0))
 
-        #bokeh_script, = graphs(hanes[3] ,'test')
-        script, div = graphs(results[0].x, results[0].y, 'Hanes')
+        script, div = graphs(results[0], 'Hanes-Woolf')
         return render_template('test.html', 
-                               data=data, 
+                               data=data,
                                results=results, 
                                bokeh_script=script, 
                                bokeh_div=div)
     else:
         return render_template('test.html')
 
-def graphs(x, y, name):
+def graphs(results, name):
+    
+    x = results.x
+    y = results.y
+    m = results.m
+    b = results.b
     
     #output_file('static/my_plot.html')
-    p = figure(plot_width=300, plot_height=300)
-        
-    p.line(x, y, legend=name,
-           line_color="black",
+    xmax = max(x*1.1)
+    ymax = max(y*1.1)
+    x_range=(0, xmax)
+    y_range=(0, ymax)
+    p = figure(plot_width=300, plot_height=300, title=name, 
+               x_range=x_range, 
+               y_range=y_range)
+    #xmax = max(x*1.1)
+    ymax = xmax * m + b
+    p.line(x=[0,xmax], y=[b,ymax],
+           line_color="blue",
            line_width=2)
-    p.circle(x, y, legend=name, 
-            fill_color='blue', 
-            fill_alpha=0.2,
+    p.circle(x, y,
+            fill_color='white', 
             color='blue',
-            size=8)
-
+            size=6)
+    p.title_text_font_size = '12pt'
     script, div = components(p)
     html = file_html(p, CDN, "my_plot")
     #save(p)
@@ -118,15 +130,14 @@ def graphs(x, y, name):
 
 if __name__ == '__main__':
     app.run(debug=True)
-'''
-# testing data
-0.00858 0.05
-0.01688 0.1
-0.02489 0.25
-0.03032 0.5
-0.03543 1
-0.03447 2.5
-0.03993 5   
-'''
-#alterar formato de input ? [s] vs v
-# TODO: yes, it is better!
+## '''
+## # testing data
+## 0.00858 0.05
+## 0.01688 0.1
+## 0.02489 0.25
+## 0.03032 0.5
+## 0.03543 1
+## 0.03447 2.5
+## 0.03993 5   
+## '''
+
