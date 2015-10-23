@@ -4,6 +4,10 @@ from scipy.optimize import curve_fit
 from scipy.stats import linregress as lreg
 import matplotlib.pyplot as pl
 
+from bokeh.plotting import figure  # not used: , output_file, save
+from bokeh.resources import CDN
+from bokeh.embed import file_html, components
+
 """Methods to determine Michaelis-Menten equation parameters and statistics.
 
    Wilkinson [TODO: insert reference] data is used to test the methods."""
@@ -177,17 +181,85 @@ def cornish_bowden(a, v0):
     n = len(straights)
     for i in range(0, n-1):
         for j in range(i+1, n):
-            ri = straights[i]
-            rj = straights[j]
-            x = (rj[1] - ri[1]) / (ri[0] - rj[0])
-            y = (ri[1] * rj[0] - rj[1] * ri[0]) / (rj[0] - ri[0])
+            ri_m, ri_b = straights[i]
+            rj_m, rj_b = straights[j]
+            x = (rj_b - ri_b) / (ri_m - rj_m)
+            y = (ri_b * rj_m - rj_b * ri_m) / (rj_m - ri_m)
             intersects_x.append(x)
             intersects_y.append(y)
 
     V = np.median(intersects_y)
     Km = np.median(intersects_x)
     # TODO: compute CIs
-    return res_object('Cornish-Bowden', V, Km, x=a, y=v0)
+    res = res_object('Cornish-Bowden', V, Km, x=a, y=v0)
+    # these are returned to help to draw a graph:
+    res.intersections_x = intersects_x
+    res.intersections_y = intersects_y
+    res.straights_m = v / s
+    res.straights_b = v
+    return res
+
+
+def lin_plot(results, name, color):
+
+    x = results.x
+    y = results.y
+
+    xmax = max(x) * 1.1
+    ymax = xmax * results.m + results.b
+
+    if results.m < 0:
+        ytop = results.b
+    else:
+        ytop = ymax
+    ytop = 1.1 * ytop
+
+    p = figure(plot_width=280, plot_height=280, title=name,
+               x_range=(0, xmax), y_range=(0, ytop))
+
+    p.line(x=[0, xmax], y=[results.b, ymax],
+           line_color=color,
+           line_width=2)
+
+    p.circle(x, y,
+             fill_color='white',
+             color=color,
+             size=6)
+
+    p.title_text_font_size = '11pt'
+
+    return p
+
+
+def cornish_bowden_plot(results, name, color):
+
+    a = results.x
+    v0 = results.y
+    intersections_x = results.intersections_x
+    intersections_y = results.intersections_y
+
+    xmax = max(intersections_x) * 1.1
+    ymax = max(intersections_y) * 1.1
+    xmin = min(-a) * 1.1
+    ymin = 0.0
+
+    p = figure(plot_width=280, plot_height=280, title=name,
+               x_range=(0, xmax), y_range=(0, ymax))
+
+    for ai, v0i in zip(a, v0):
+        ymaxi = a  # TODO, stopped here
+        p.line(x=[-ai, xmax], y=[0, ymaxi],
+               line_color='black',
+               line_width=1)
+
+    p.circle(x, y,
+             fill_color='white',
+             color=color,
+             size=6)
+
+    p.title_text_font_size = '11pt'
+
+    return p
 
 
 def read_data(wilkinson):  # used just for testing

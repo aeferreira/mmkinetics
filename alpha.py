@@ -1,5 +1,5 @@
 import os
-from math import atan
+import methods
 from flask import (Flask,
                    request,
                    render_template,
@@ -7,11 +7,6 @@ from flask import (Flask,
                    redirect,
                    make_response,
                    jsonify)
-from bokeh.plotting import figure  # not used: , output_file, save
-from bokeh.resources import CDN
-from bokeh.embed import file_html, components
-
-import methods
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -48,11 +43,13 @@ wilkinson = """# Wilkinson demo data
 """
 
 
+# AJAX calls
 @app.route('/_demodata')
 def demo_data():
     return jsonify(result=wilkinson)
 
 
+# main page
 @app.route('/front', methods=['POST', 'GET'])
 def front_page():
     if request.method != 'POST':
@@ -103,8 +100,9 @@ def front_page():
               methods.cornish_bowden):
         results.append(m(a, v0))
 
-    plots = [lin_plot(results[i], results[i].name) for i in (0,1,2)]
-    script, divs = components(plots)
+    colors = 'blue', 'green', 'red'
+    plots = [methods.lin_plot(r, r.name, c) for r, c in zip(results, colors)]
+    script, divs = methods.components(plots)
 
     return render_template('test.html',
                            data=data,
@@ -112,35 +110,6 @@ def front_page():
                            bokeh_script=script,
                            bokeh_divs=divs)
 
-
-def lin_plot(results, name):
-
-    x = results.x
-    y = results.y
-
-    xmax = max(x * 1.1)
-    ymax = max(y * 1.1)
-    x_range = (0, xmax)
-    y_range = (0, ymax)
-
-    p = figure(plot_width=300, plot_height=300, title=name,
-               x_range=x_range,
-               y_range=y_range)
-
-    ymax = xmax * results.m + results.b
-
-    p.line(x=[0, xmax], y=[results.b, ymax],
-           line_color="blue",
-           line_width=2)
-
-    p.circle(x, y,
-             fill_color='white',
-             color='blue',
-             size=6)
-
-    p.title_text_font_size = '12pt'
-
-    return p
 
 if __name__ == '__main__':
     app.run(debug=True)
