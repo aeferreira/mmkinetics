@@ -67,6 +67,16 @@
        {% endif %}
     </div>
 
+    <!-- Results report -->
+    <div class="col-md-4">
+       {% if results %}
+           <h4>All plots:</h4>
+           <div class="report_results">
+            {{ bokeh_divs[0] |safe }}
+           </div>
+       {% endif %}
+    </div>
+
 </div>
 
 <div class="row">
@@ -76,9 +86,6 @@
     <h4>Plots:</h4>
     <div class="lin_plots">
         <div class="col-md-3">
-            {{ bokeh_divs[0] |safe }}
-        </div>
-        <div class="col-md-3">
             {{ bokeh_divs[1] |safe }}
         </div>
         <div class="col-md-3">
@@ -86,6 +93,9 @@
         </div>
         <div class="col-md-3">
             {{ bokeh_divs[3] |safe }}
+        </div>
+        <div class="col-md-3">
+            {{ bokeh_divs[4] |safe }}
         </div>
     <div>
     {% endif %}

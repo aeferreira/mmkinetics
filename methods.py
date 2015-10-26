@@ -200,7 +200,48 @@ def cornish_bowden(a, v0):
     return res
 
 
-def lin_plot(results, name, color):
+# ------------ plots --------------------------
+default_color_scheme = ('darkviolet',
+                        'green',
+                        'darkred',
+                        'cornflowerblue',
+                        'goldenrod')
+
+
+def all_plots(a, v0, results, colorscheme=None):
+
+    if colorscheme is None:
+        colorscheme = default_color_scheme
+
+    xmax = max(a) * 1.1
+    ymax = max(v0) * 1.1
+
+    p = figure(plot_width=300, plot_height=300, title='all methods',
+               x_range=(0, xmax), y_range=(0, ymax))
+
+    for r, c in zip(results, colorscheme):
+        V = r.V
+        Km = r.Km
+        x, y = MM_line(V, Km, xmax=xmax)
+
+        p.line(x=x, y=y, legend=r.name,
+               line_color=c,
+               line_width=2)
+
+    p.circle(a, v0,
+             fill_color='white',
+             color='black',
+             size=6)
+
+    p.title_text_font_size = '11pt'
+    p.legend.orientation = "bottom_right"
+    p.legend.label_text_font_size = '8pt'
+    p.legend.glyph_width = 15
+
+    return p
+
+
+def lin_plot(results, color):
 
     x = results.x
     y = results.y
@@ -214,7 +255,7 @@ def lin_plot(results, name, color):
         ytop = ymax
     ytop = 1.1 * ytop
 
-    p = figure(plot_width=280, plot_height=280, title=name,
+    p = figure(plot_width=280, plot_height=280, title=results.name,
                x_range=(0, xmax), y_range=(0, ytop))
 
     p.line(x=[0, xmax], y=[results.b, ymax],
@@ -231,7 +272,7 @@ def lin_plot(results, name, color):
     return p
 
 
-def cornish_bowden_plot(results, name, color):
+def cornish_bowden_plot(results, color):
 
     a = results.x
     v0 = results.y
@@ -243,28 +284,36 @@ def cornish_bowden_plot(results, name, color):
     xmin = max(a) * 1.1
     ymin = 0.0
 
-    p = figure(plot_width=280, plot_height=280, title=name,
+    p = figure(plot_width=280, plot_height=280, title=results.name,
                x_range=(-xmin, xmax), y_range=(0, ymax))
 
     for ai, v0i in zip(a, v0):
         ymaxi = v0i / ai * (xmax + ai)
         p.line(x=[-ai, xmax], y=[0, ymaxi],
-               line_color='black',
+               line_color='gray',
                line_width=1)
 
     for x, y in zip(intersections_x, intersections_y):
         p.circle(x, y,
                  fill_color='white',
-                 color=color,
+                 color='black',
                  size=4)
     p.circle(results.Km, results.V,
              fill_color='white',
-             color='red',
+             color=color,
              size=6)
 
     p.title_text_font_size = '11pt'
 
     return p
+
+
+def generate_plots(a, v0, results):
+    cs = default_color_scheme
+    plots = [all_plots(a, v0, results)]
+    plots.extend([lin_plot(r, c) for r, c in zip(results[0:3], cs)])
+    plots.append(cornish_bowden_plot(results[4], cs[4]))
+    return plots
 
 
 def read_data(wilkinson):  # used just for testing

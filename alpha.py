@@ -100,9 +100,8 @@ def front_page():
               methods.cornish_bowden):
         results.append(m(a, v0))
 
-    colors = 'blue', 'green', 'red'
-    plots = [methods.lin_plot(r, r.name, c) for r, c in zip(results, colors)]
-    plots.append(methods.cornish_bowden_plot(results[4], results[4].name, 'blue'))
+    plots = methods.generate_plots(a, v0, results)
+
     script, divs = methods.components(plots)
 
     return render_template('test.html',
