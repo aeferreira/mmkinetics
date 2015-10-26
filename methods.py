@@ -240,21 +240,26 @@ def cornish_bowden_plot(results, name, color):
 
     xmax = max(intersections_x) * 1.1
     ymax = max(intersections_y) * 1.1
-    xmin = min(-a) * 1.1
+    xmin = max(a) * 1.1
     ymin = 0.0
 
     p = figure(plot_width=280, plot_height=280, title=name,
-               x_range=(0, xmax), y_range=(0, ymax))
+               x_range=(-xmin, xmax), y_range=(0, ymax))
 
     for ai, v0i in zip(a, v0):
-        ymaxi = a  # TODO, stopped here
+        ymaxi = v0i / ai * (xmax + ai)
         p.line(x=[-ai, xmax], y=[0, ymaxi],
                line_color='black',
                line_width=1)
 
-    p.circle(x, y,
+    for x, y in zip(intersections_x, intersections_y):
+        p.circle(x, y,
+                 fill_color='white',
+                 color=color,
+                 size=4)
+    p.circle(results.Km, results.V,
              fill_color='white',
-             color=color,
+             color='red',
              size=6)
 
     p.title_text_font_size = '11pt'

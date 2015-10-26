@@ -75,14 +75,17 @@
     {% if results %}
     <h4>Plots:</h4>
     <div class="lin_plots">
-        <div class="col-md-4">
+        <div class="col-md-3">
             {{ bokeh_divs[0] |safe }}
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             {{ bokeh_divs[1] |safe }}
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             {{ bokeh_divs[2] |safe }}
+        </div>
+        <div class="col-md-3">
+            {{ bokeh_divs[3] |safe }}
         </div>
     <div>
     {% endif %}

@@ -102,6 +102,7 @@ def front_page():
 
     colors = 'blue', 'green', 'red'
     plots = [methods.lin_plot(r, r.name, c) for r, c in zip(results, colors)]
+    plots.append(methods.cornish_bowden_plot(results[4], results[4].name, 'blue'))
     script, divs = methods.components(plots)
 
     return render_template('test.html',
