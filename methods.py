@@ -216,7 +216,7 @@ def all_plots(a, v0, results, colorscheme=None):
     xmax = max(a) * 1.1
     ymax = max(v0) * 1.1
 
-    p = figure(plot_width=300, plot_height=300, title='all methods',
+    p = figure(plot_width=400, plot_height=400, title='all methods',
                x_range=(0, xmax), y_range=(0, ymax))
 
     for r, c in zip(results, colorscheme):
@@ -255,7 +255,8 @@ def lin_plot(results, color):
         ytop = ymax
     ytop = 1.1 * ytop
 
-    p = figure(plot_width=280, plot_height=280, title=results.name,
+    p = figure(plot_width=250, plot_height=250, title=results.name,
+               tools="pan,wheel_zoom,box_zoom,reset,resize, save",
                x_range=(0, xmax), y_range=(0, ytop))
 
     p.line(x=[0, xmax], y=[results.b, ymax],
@@ -284,7 +285,8 @@ def cornish_bowden_plot(results, color):
     xmin = max(a) * 1.1
     ymin = 0.0
 
-    p = figure(plot_width=280, plot_height=280, title=results.name,
+    p = figure(plot_width=250, plot_height=250, title=results.name,
+               tools="pan,wheel_zoom,box_zoom,reset,resize, save",
                x_range=(-xmin, xmax), y_range=(0, ymax))
 
     for ai, v0i in zip(a, v0):

@@ -19,6 +19,10 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+.panel-heading {
+    padding: 20px 15px;
+}
+
 .bk-plot-left {
     /*width: 100%;*/
 	width:10px;
@@ -40,7 +44,7 @@ body {
 
 .timevsconc{
     width:100%;
-    height:320px;
+    height:255px;
     margin-bottom:2%;
     color: #333;
     border: 1px solid #ccc;

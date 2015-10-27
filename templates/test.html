@@ -3,7 +3,7 @@
 {% block body %}
 <div class="row" style="margin-top:5px">
         <div class="col-md-6" style="padding-top:10px">
-          <img src="http://www.fc.ul.pt/sites/default/files/fcul/institucional/normas_graficas/Ciencias_UL_Azul_H.png" style="width:270px;height:70px;" alt="logo.png" />
+          <img src="{{ url_for('static', filename='fcul_logo.png') }}" style="width:270px;height:70px;" alt="logo.png" />
         </div>
         <ul class="nav nav-tabs" style="padding-top:50px;margin-bottom:10px;font-size: 15px;">
           <li role="presentation" class="active"><a href="{{ url_for('front_page') }}">Home</a></li>
@@ -11,94 +11,146 @@
           <li role="presentation"><a href="{{ url_for('contacts') }}">Contacts</a></li>
         </ul>
 </div>
+
+{% if messages %}
+<!-- Error messages -->
+<p class="bg-danger" style="text-align:center">
+  {% for message in messages %}
+        {{ message }}
+  {% endfor %}
+</p>
+{% endif %}
+
+
 <div class="row">
     <div class="col-md-4">
-      <h4>Input your data (<abbr title="Concentration">a</abbr> vs <em><abbr title="Initial rate">v<sub>0</sub></abbr></em>):</h4>
-
-      {% if messages %}
-        <!-- Error messages -->
-        <p class="bg-danger" style="text-align:center">
-          {% for message in messages %}
-                {{ message }}
-          {% endfor %}
-        </p>
-      {% endif %}
-
-      <!-- Input box -->
       <form action="/front" method="post">
-        <div class="btn-toolbar" role="toolbar" aria-label="Input toolbar">
-            <div class="btn-group" role="group" aria-label="Compute button">
-                <button type="submit" id="input_compute" class="btn btn-primary">Compute parameters</button>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Data
+                <div class="pull-right">
+                    <div class="btn-group">
+                        <button type="submit" id="input_compute" class="btn btn-primary btn-sm">
+                            Compute
+                        </button>
+                        <button type="button" id="input_demo" class="btn btn-default btn-sm">
+                            Demo data
+                        </button>
+                        <button type="button" id="input_clear" class="btn btn-danger btn-sm">
+                            Clear
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="btn-group" role="group" aria-label="Other buttons">
-                <button type="button" id="input_demo" class="btn btn-default">Demo data</button>
-                <button type="button" id="input_clear" class="btn btn-danger">Clear</button>        
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <textarea id="timevsconc" name="timevsconc" class="timevsconc">{% if data %}{{ data }}{% endif %}</textarea>
             </div>
-        </div>        
-        <textarea id="timevsconc" name="timevsconc" class="timevsconc">{% if data %}{{ data }}{% endif %}</textarea>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
       </form>
     </div>
 
     <!-- Results report -->
-    <div class="col-md-4">
-       {% if results %}
-           <h4>Results:</h4>
-           <div class="report_results">
-           {% for result in results %}
-              <p><strong>{{ result.name }}</strong></p>
-              <table style="width:100%">
-                <tr>
-                    <td>V</td><td>{{ result.V|round(4) }}</td>
-                </tr>
-                <tr>
-                    <td>K<sub>m</sub></td><td>{{ result.Km|round(4) }}</td>
-                </tr>
-                {% if result.SE_V %}
-                <tr>
-                    <td>SE (V)</td><td>{{ result.SE_V|round(4) }}</td>
-                </tr>
-                <tr>
-                    <td>SE (K<sub>m</sub>)</td><td>{{ result.SE_Km|round(4) }}</td>
-                </tr>
-                {% endif %}
-              </table>
-              <br />
-           {% endfor %}</div>
-       {% endif %}
-    </div>
+    <div class="col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Results
+                <div class="pull-right">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary btn-sm">
+                            Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+               {% if results %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th><strong>Method</strong></th>
+                                    <th><i>V</i></th>
+                                    <th><i>K<sub>m</sub></i></th>
+                                    <th>SE (<i>V</i>)</th>
+                                    <th>SE (<i>K<sub>m</sub></i>)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                               {% for result in results %}
+                                <tr>
+                                    <td>{{ result.name }}</td>
+                                    <td>{{ result.V|round(4) }}</td>
+                                    <td>{{ result.Km|round(4) }}</td>
+                                    {% if result.SE_V %}
+                                    <td>{{ result.SE_V|round(4) }}</td>
+                                    <td>{{ result.SE_Km|round(4) }}</td>
+                                    {% else %}
+                                    <td></td>
+                                    <td></td>
+                                    {% endif %}
+                                </tr>
+                               {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.table-responsive -->
+               
+               {% endif %}
+            
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
 
-    <!-- Results report -->
-    <div class="col-md-4">
-       {% if results %}
-           <h4>All plots:</h4>
-           <div class="report_results">
-            {{ bokeh_divs[0] |safe }}
-           </div>
-       {% endif %}
     </div>
 
 </div>
 
 <div class="row">
 
-    <!-- Plot -->
-    {% if results %}
-    <h4>Plots:</h4>
-    <div class="lin_plots">
-        <div class="col-md-3">
-            {{ bokeh_divs[1] |safe }}
+    <!-- Plot for all methods -->
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Plots
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+               {% if results %}
+                <!-- Other plots -->
+                <div class="row">
+                    <div class="col-md-5">
+                        {{ bokeh_divs[0] |safe }}
+                    </div>
+                    <div class="col-md-7">
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ bokeh_divs[1] |safe }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ bokeh_divs[2] |safe }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ bokeh_divs[3] |safe }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ bokeh_divs[4] |safe }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               {% endif %}
+            </div>
+            <!-- /.panel-body -->
         </div>
-        <div class="col-md-3">
-            {{ bokeh_divs[2] |safe }}
-        </div>
-        <div class="col-md-3">
-            {{ bokeh_divs[3] |safe }}
-        </div>
-        <div class="col-md-3">
-            {{ bokeh_divs[4] |safe }}
-        </div>
-    <div>
-    {% endif %}
-
+        <!-- /.panel -->
+    </div>
 </div>
+
 {% endblock %}
