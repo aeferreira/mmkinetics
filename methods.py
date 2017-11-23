@@ -7,6 +7,9 @@ import matplotlib.pyplot as pl
 from bokeh.plotting import figure  # not used: , output_file, save
 from bokeh.resources import CDN
 from bokeh.embed import file_html, components
+from bokeh.models import CustomJS, ColumnDataSource, CheckboxButtonGroup
+from bokeh.io import vform
+
 
 """Methods to determine Michaelis-Menten equation parameters and statistics.
 
@@ -207,6 +210,13 @@ default_color_scheme = ('darkviolet',
                         'cornflowerblue',
                         'goldenrod')
 
+## sources = {}
+## s = dict(s=ColumnDataSource(sources))
+## code = """
+##     var vvv = bg.get('value');
+##     alert(vvv);
+## """
+## callback = CustomJS(args=s, code=code)
 
 def all_plots(a, v0, results, colorscheme=None):
 

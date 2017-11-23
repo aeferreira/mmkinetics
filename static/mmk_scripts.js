@@ -10,4 +10,16 @@ $( document ).ready(function() {
       });
       return false;
     });
+    $('#methods_group .btn').on('click',function(e){
+        setTimeout(count);
+    })
+    var count =  function(){
+        var val = '';
+        $('#methods_group .btn').each(function(i, btn){
+            if($(btn).hasClass('active') ){
+                val += '' + $(btn).data('wat');
+            }
+        });
+        $('#hierHier').html(val); 
+    }
 });

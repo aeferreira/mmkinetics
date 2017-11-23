@@ -120,13 +120,38 @@
             </div>
             <!-- /.panel-heading -->
             <div class="panel-body">
-               {% if results %}
+               
                 <!-- Other plots -->
                 <div class="row">
                     <div class="col-md-5">
+                        {% if results %}
                         {{ bokeh_divs[0] |safe }}
+                        {% endif %}
+                        <form id="methodbuttons">
+                        <div class="btn-group" id="methods_group" data-toggle="buttons">
+                          <label class="btn btn-default active" data-wat="0">
+                            <input type="checkbox" autocomplete="off" checked> Hyp
+                          </label>
+                          <label class="btn btn-default active" data-wat="1">
+                            <input type="checkbox" autocomplete="off" checked> C.Bowden
+                          </label>
+                          <label class="btn btn-default active" data-wat="2">
+                            <input type="checkbox" autocomplete="off" checked> Hanes
+                          </label>
+                          <label class="btn btn-default active" data-wat="3">
+                            <input type="checkbox" autocomplete="off" checked> E.Hofstee
+                          </label>
+                          <label class="btn btn-default active" data-wat="4">
+                            <input type="checkbox" autocomplete="off" checked> L.Burk
+                          </label>
+                        </div>
+                        </form>
+<div id='hierHier'>
+    01234
+</div>
                     </div>
                     <div class="col-md-7">
+                        {% if results %}
                         <div class="row">
                             <div class="col-md-6">
                                 {{ bokeh_divs[1] |safe }}
@@ -143,9 +168,9 @@
                                 {{ bokeh_divs[4] |safe }}
                             </div>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
-               {% endif %}
             </div>
             <!-- /.panel-body -->
         </div>
