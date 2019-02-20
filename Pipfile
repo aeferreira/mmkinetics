@@ -11,7 +11,6 @@ scipy = "*"
 matplotlib = "*"
 flask = "*"
 bokeh = "*"
-tkinter = "*"
 
 [requires]
 python_version = "3.6"

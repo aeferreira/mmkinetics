@@ -24,7 +24,7 @@ def help():
         readme = ''
         for line in file:
             readme += line
-    return render_template('help.html', readme=readme.decode('utf-8'))
+    return render_template('help.html', readme=readme)
 
 
 @app.route('/contacts')

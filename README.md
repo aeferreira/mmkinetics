@@ -23,7 +23,7 @@ Still not available
 
 ### Dependencies (to run a server)
 
-- Python 2.7
+- Python 3.6
 
 #### Mandatory
 
@@ -36,8 +36,6 @@ Still not available
 - [flask](http://flask.pocoo.org/)
 
 - [bokeh plots](http://bokeh.pydata.org/)
-
-- [tkinter](https://docs.python.org/3/library/tk.html)
 
 ### Installation
 
