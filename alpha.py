@@ -103,7 +103,8 @@ def front_page():
     plots = methods.generate_plots(a, v0, results)
 
     script, divs = methods.components(plots)
-
+    print(script, divs)
+    
     return render_template('test.html',
                            data=data,
                            results=results,

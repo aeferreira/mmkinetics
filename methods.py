@@ -174,7 +174,9 @@ def hyperbolic(a, v0):
 
 
 def cornish_bowden(a, v0):
-    straights = [(v/s, v) for v, s in zip(v0, a)]
+    straights = []
+    for v, s in zip(v0, a):
+        straights.append((v/s, v))
     intersects_x = []
     intersects_y = []
 
@@ -233,8 +235,8 @@ def all_plots(a, v0, results, colorscheme=None):
              color='black',
              size=6)
 
-    p.title_text_font_size = '11pt'
-    p.legend.orientation = "bottom_right"
+    p.title.text_font_size = '11pt'
+    p.legend.location = "bottom_right"
     p.legend.label_text_font_size = '8pt'
     p.legend.glyph_width = 15
 
@@ -255,8 +257,7 @@ def lin_plot(results, color):
         ytop = ymax
     ytop = 1.1 * ytop
 
-    p = figure(plot_width=250, plot_height=250, title=results.name,
-               tools="pan,wheel_zoom,box_zoom,reset,resize, save",
+    p = figure(plot_width=250, plot_height=250, title=results.name,               
                x_range=(0, xmax), y_range=(0, ytop))
 
     p.line(x=[0, xmax], y=[results.b, ymax],
@@ -268,7 +269,7 @@ def lin_plot(results, color):
              color=color,
              size=6)
 
-    p.title_text_font_size = '11pt'
+    p.title.text_font_size = '11pt'
 
     return p
 
@@ -285,8 +286,7 @@ def cornish_bowden_plot(results, color):
     xmin = max(a) * 1.1
     ymin = 0.0
 
-    p = figure(plot_width=250, plot_height=250, title=results.name,
-               tools="pan,wheel_zoom,box_zoom,reset,resize, save",
+    p = figure(plot_width=250, plot_height=250, title=results.name,        
                x_range=(-xmin, xmax), y_range=(0, ymax))
 
     for ai, v0i in zip(a, v0):
@@ -305,7 +305,7 @@ def cornish_bowden_plot(results, color):
              color=color,
              size=6)
 
-    p.title_text_font_size = '11pt'
+    p.title.text_font_size = '11pt'
 
     return p
 

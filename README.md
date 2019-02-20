@@ -37,6 +37,8 @@ Still not available
 
 - [bokeh plots](http://bokeh.pydata.org/)
 
+- [tkinter](https://docs.python.org/3/library/tk.html)
+
 ### Installation
 
 When ready and registered on [PyPI](https://pypi.python.org/pypi), **pip-based installation** will be available.
