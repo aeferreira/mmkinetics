@@ -7,6 +7,7 @@ import matplotlib.pyplot as pl
 from bokeh.plotting import figure  # not used: , output_file, save
 from bokeh.resources import CDN
 from bokeh.embed import file_html, components
+from bokeh.models import HoverTool
 
 """Methods to determine Michaelis-Menten equation parameters and statistics.
 
@@ -226,7 +227,7 @@ def all_plots(a, v0, results, colorscheme=None):
         Km = r.Km
         x, y = MM_line(V, Km, xmax=xmax)
 
-        p.line(x=x, y=y, legend=r.name,
+        p.line(x, y, legend=r.name,
                line_color=c,
                line_width=2)
 
@@ -239,6 +240,16 @@ def all_plots(a, v0, results, colorscheme=None):
     p.legend.location = "bottom_right"
     p.legend.label_text_font_size = '8pt'
     p.legend.glyph_width = 15
+
+    p.legend.click_policy = "hide"
+
+    p.xaxis[0].axis_label = 'a'
+    p.yaxis[0].axis_label = 'v'
+
+    p.add_tools(HoverTool(tooltips=[
+    ('a', "$x"),
+    ('v', "$y")
+    ]))
 
     return p
 
