@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
+
 <div class="row" style="margin-top:5px">
         <div class="col-md-6" style="padding-top:10px">
           <img src="{{ url_for('static', filename='fcul_logo.png') }}" style="height: 70px;" alt="logo.png" />
@@ -12,14 +13,9 @@
         </ul>
 </div>
 
-{% if messages %}
 <!-- Error messages -->
-<p class="bg-danger" style="text-align:center">
-  {% for message in messages %}
-        {{ message }}
-  {% endfor %}
+<p id="error_messages_board"class="bg-danger" style="text-align:center">
 </p>
-{% endif %}
 
 
 <div class="row">
@@ -30,7 +26,7 @@
                 Data
                 <div class="pull-right">
                     <div class="btn-group">
-                        <button type="submit" id="input_compute" class="btn btn-primary btn-sm">
+                        <button type="button" id="input_compute" class="btn btn-primary btn-sm">
                             Compute
                         </button>
                         <button type="button" id="input_demo" class="btn btn-default btn-sm">
@@ -44,7 +40,9 @@
             </div>
             <!-- /.panel-heading -->
             <div class="panel-body">
-                <textarea id="timevsconc" name="timevsconc" class="timevsconc">{% if data %}{{ data }}{% endif %}</textarea>
+	      <div id="timevsconc" name="timevsconc" style="display: flex;
+							    justify-content: center;"></div>
+	      <p>To add extra rows, simply drag the little square (fill handle) in the corner of a selected cell in the last row. Pasted content will trigger an automatic addition of rows.</p>
             </div>
             <!-- /.panel-body -->
         </div>
@@ -66,41 +64,8 @@
                 </div>
             </div>
             <!-- /.panel-heading -->
-            <div class="panel-body">
-               {% if results %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th><strong>Method</strong></th>
-                                    <th><i>V</i></th>
-                                    <th><i>K<sub>m</sub></i></th>
-                                    <th>SE (<i>V</i>)</th>
-                                    <th>SE (<i>K<sub>m</sub></i>)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                               {% for result in results %}
-                                <tr>
-                                    <td>{{ result.name }}</td>
-                                    <td>{{ result.V|round(4) }}</td>
-                                    <td>{{ result.Km|round(4) }}</td>
-                                    {% if result.SE_V %}
-                                    <td>{{ result.SE_V|round(4) }}</td>
-                                    <td>{{ result.SE_Km|round(4) }}</td>
-                                    {% else %}
-                                    <td></td>
-                                    <td></td>
-                                    {% endif %}
-                                </tr>
-                               {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- /.table-responsive -->
-               
-               {% endif %}
-            
+            <div class="panel-body" id="results-table">
+              <!-- /.table-responsive -->               
             </div>
             <!-- /.panel-body -->
         </div>
@@ -119,38 +84,90 @@
                 Plots
             </div>
             <!-- /.panel-heading -->
-            <div class="panel-body">
-               {% if results %}
-                <!-- Other plots -->
-                <div class="row">
-                    <div class="col-md-5">
-                        {{ bokeh_divs[0] |safe }}
-                    </div>
-                    <div class="col-md-7">
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ bokeh_divs[1] |safe }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ bokeh_divs[2] |safe }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ bokeh_divs[3] |safe }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ bokeh_divs[4] |safe }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-               {% endif %}
+            <div id="plots-scripts" style="display: none;">
+	    </div>
+            <div class="panel-body" id="plots-panel">
             </div>
             <!-- /.panel-body -->
         </div>
         <!-- /.panel -->
     </div>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+  
+  <script>
+   $( document ).ready(function() {
+     var data = [
+       ["", ""],
+       ["", ""],
+       ["", ""],
+       ["", ""],
+       ["", ""],
+     ];
+     
+     {% if data %}
+     var data = {{ data }}
+     {% endif %}
+       
+     var container = document.getElementById('timevsconc');
+     var excel_table_container = new Handsontable(container, {
+       data: data,
+       rowHeaders: false,
+       colHeaders: false,
+       colWidths: 130,
+       rowHeights: 50,
+       filters: false,
+       dropdownMenu: false,
+       fillHandle: true
+     });
+
+     $( "#input_clear" ).click(function() {
+       excel_table_container.loadData([
+	 ["", ""],
+	 ["", ""],
+	 ["", ""],
+	 ["", ""],
+	 ["", ""],
+       ])
+     });
+
+
+     $("#input_demo").bind('click', function() {
+       $.getJSON($SCRIPT_ROOT + '/_demodata', {},
+		 function(data) {
+		   excel_table_container.loadData(data.result);
+		 });
+       return false;
+     });
+
+     $('#input_compute').click(function () {       
+       excel_table = excel_table_container.getData()
+       excel_string = ''       
+       for (i in excel_table) {
+	 excel_string += excel_table[i].toString() + '\n'
+       }
+       $.ajax({
+	 type: 'post',
+	 url: $SCRIPT_ROOT + "/front",
+	 data: {'data_values': excel_string},
+	 success: function(result){
+	   if (result.status == "error") {
+	     $('#error_messages_board').text(result.messages)
+	   } else {
+	     $('#plots-scripts').html(result.bokeh_script)
+	     $('#plots-panel').html(result.bokeh_divs)
+	     $('#results-table').html(result.results_table)
+	     
+	   };
+	 }
+       });
+     });
+     
+     
+   });
+  </script>
 
 {% endblock %}

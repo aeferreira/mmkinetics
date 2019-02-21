@@ -218,7 +218,7 @@ def all_plots(a, v0, results, colorscheme=None):
     xmax = max(a) * 1.1
     ymax = max(v0) * 1.1
 
-    p = figure(plot_width=400, plot_height=400, title='all methods',
+    p = figure(plot_width=400, plot_height=400, title='All Methods',
                x_range=(0, xmax), y_range=(0, ymax))
 
     for r, c in zip(results, colorscheme):

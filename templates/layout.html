@@ -10,7 +10,7 @@
 
     <title>Michaelis-Menten kinetics</title>
 
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
     <!-- include Bootstrap and site specific stylesheets -->
     <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='mmk_styles.css') }}" rel="stylesheet">
@@ -26,27 +26,32 @@
     <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-1.0.4.min.css" rel="stylesheet">
     <link href="http://cdn.pydata.org/bokeh/release/bokeh-tables-1.0.4.min.css" rel="stylesheet">
 
-    <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-1.0.4.min.js"></script>
+    <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-1.0.4.min.js" ></script>
     <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-1.0.4.min.js"></script>
     <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-tables-1.0.4.min.js"></script>
     <script type="text/javascript" src="http://cdn.pydata.org/bokeh/release/bokeh-api-1.0.4.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@6.2.2/dist/handsontable.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/handsontable@6.2.2/dist/handsontable.full.min.css" rel="stylesheet" media="screen">
+
+   
     {{ bokeh_script | safe }}
 
   </head>
   <body>
     <div class="container">
-{% block body %}{% endblock %}
+      {% block body %}{% endblock %}
     </div>
 
     <!-- Bootstrap core JavaScript
-    ================================================== -->
+	 ================================================== -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript">
-      var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-     </script>
+     var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+
     <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='mmk_scripts.js') }}"></script>
 
+    {% block scripts %}{% endblock %}
   </body>
 </html>

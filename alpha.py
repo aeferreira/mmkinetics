@@ -32,15 +32,15 @@ def contacts():
     return render_template('contacts.html')
 
 
-wilkinson = """# Wilkinson demo data
-#a     v
-0.138 0.148
-0.220 0.171
-0.291 0.234
-0.560 0.324
-0.766 0.390
-1.460 0.493
-"""
+wilkinson = [["# Wilkinson", "demo data"],
+             ["#a", "v"],
+             ["0.138", "0.148"],
+             ["0.220", "0.171"],
+             ["0.291", "0.234"],
+             ["0.560", "0.324"],
+             ["0.766", "0.390"],
+             ["1.460", "0.493"]]
+
 
 
 # AJAX calls
@@ -55,7 +55,8 @@ def front_page():
     if request.method != 'POST':
         return render_template('test.html')
 
-    data = str(request.form['timevsconc'])
+    data = str(request.form['data_values'])
+
     bad_input = False
 
     x = []
@@ -68,17 +69,17 @@ def front_page():
         bad_input = True
         messages.append('Please provide a two column input')
 
-    for line in data.splitlines():
+    for line in data.splitlines():        
         line = line.strip()
         if len(line) == 0 or line.startswith('#'):
             continue
-        if len(line.split()) != 2:
+        if len(line.split(',')) != 2:
             messages.append('Please provide a two column input')
             bad_input = True
             break
         try:
-            x0 = float(line.split()[0])
-            x1 = float(line.split()[1])
+            x0 = float(line.split(',')[0])
+            x1 = float(line.split(',')[1])
         except:
             messages.append('Please comment text lines with a # symbol')
             bad_input = True
@@ -88,28 +89,84 @@ def front_page():
         y.append(x1)
 
     if bad_input:
-        return render_template('test.html', messages=messages, data=data)
+        return jsonify({"status": "error", "messages": messages})
 
     a, v0 = methods.lists2arrays(x, y)
 
+    results_table = ''
     results = []
     for m in (methods.hanes_woolf,
               methods.eadie_hofstee,
               methods.lineweaver_burk,
               methods.hyperbolic,
               methods.cornish_bowden):
-        results.append(m(a, v0))
+        r = m(a, v0)
+        results.append(r)
+        results_table += """
+        <tr>
+            <td>{0}</td>
+            <td>{1}</td>
+            <td>{2}</td>
+        """.format(r.name, round(r.V, 4), round(r.Km, 4))
+        if r.SE_V:
+            results_table += """<td>{0}</td>
+            <td>{1}</td></tr>""".format(round(r.SE_V, 4),
+                                        round(r.SE_Km, 4))
+        else:
+            results_table += "<td></td><td></td></tr>"
+
+    results_table = """
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th><strong>Method</strong></th>
+                    <th><i>V</i></th>
+                    <th><i>K<sub>m</sub></i></th>
+                    <th>SE (<i>V</i>)</th>
+                    <th>SE (<i>K<sub>m</sub></i>)</th>
+                </tr>
+            </thead>
+            <tbody>
+    {0}
+            </tbody>
+        </table>
+    </div>
+    """.format(results_table)
 
     plots = methods.generate_plots(a, v0, results)
 
     script, divs = methods.components(plots)
-    print(script, divs)
-    
-    return render_template('test.html',
-                           data=data,
-                           results=results,
-                           bokeh_script=script,
-                           bokeh_divs=divs)
+
+    plots_div = """
+<div class="row">
+    <div class="col-md-5">
+        {0}
+    </div>
+    <div class="col-md-7">
+        <div class="row">
+            <div class="col-md-6">
+                {1}
+            </div>
+            <div class="col-md-6">
+                {2}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                {3}
+            </div>
+            <div class="col-md-6">
+                {4}
+            </div>
+        </div>
+    </div>
+</div>
+    """.format(divs[0], divs[1], divs[2], divs[3], divs[4])
+
+    return jsonify({'bokeh_divs': plots_div,
+                    'bokeh_script': script,
+                    'results_table': results_table})
 
 
 if __name__ == '__main__':
