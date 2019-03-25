@@ -1,0 +1,5 @@
+To run tests
+python3 -m unittest tests/test_methods.py
+
+To install from TestPypi
+python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps mmkinetics-preis

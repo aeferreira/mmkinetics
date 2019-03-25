@@ -1,0 +1,10 @@
+README.md
+setup.py
+mmkinetics/__init__.py
+mmkinetics/methods.py
+mmkinetics/mmkinetics.py
+mmkinetics_preis.egg-info/PKG-INFO
+mmkinetics_preis.egg-info/SOURCES.txt
+mmkinetics_preis.egg-info/dependency_links.txt
+mmkinetics_preis.egg-info/requires.txt
+mmkinetics_preis.egg-info/top_level.txt
